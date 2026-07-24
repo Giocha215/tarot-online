@@ -112,7 +112,11 @@ function AdvisorContent() {
         <div className="min-h-0 flex-1">
           <iframe
             title={t.video.title}
-            src={`${session.joinUrl}#config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(view?.consultant.name ?? "Asesora")}`}
+            src={
+              session.joinUrl.includes("jit.si")
+                ? `${session.joinUrl}#config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(view?.consultant.name ?? "Asesora")}`
+                : session.joinUrl
+            }
             className="h-full w-full border-0"
             allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
           />

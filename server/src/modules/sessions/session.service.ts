@@ -14,29 +14,75 @@ import * as walletRepo from "../wallet/wallet.repository.js";
 import * as sessionRepo from "./session.repository.js";
 
 /**
- * URL de la sala según el proveedor configurado.
- *  - jitsi: sala única y embebible (iframe), sin cuenta ni claves.
+ * Crea/obtiene la sala de la videollamada según el proveedor configurado.
+ *  - daily: crea una sala en Daily (embebible, anónima) que caduca sola.
+ *  - jitsi: sala única de meet.jit.si (embebible, pero exige moderador).
  *  - teams: enlace de la consultora o el por defecto (NO embebe).
- * `embeddable` le dice al frontend si puede meterlo en un iframe o debe
- * ofrecer "abrir en pestaña".
  */
-function buildJoinUrl(teamsUrl: string | null): {
-  joinUrl: string | null;
-  embeddable: boolean;
-} {
+async function createRoom(
+  durationMin: number,
+  teamsUrl: string | null,
+): Promise<string | null> {
+  if (env.VIDEO_PROVIDER === "daily") {
+    return createDailyRoom(durationMin);
+  }
   if (env.VIDEO_PROVIDER === "jitsi") {
     const room = `TarotOnline-${crypto.randomBytes(6).toString("hex")}`;
-    return { joinUrl: `https://${env.JITSI_HOST}/${room}`, embeddable: true };
+    return `https://${env.JITSI_HOST}/${room}`;
   }
-  return {
-    joinUrl: teamsUrl || env.TEAMS_DEFAULT_JOIN_URL || null,
-    embeddable: false,
-  };
+  return teamsUrl || env.TEAMS_DEFAULT_JOIN_URL || null;
 }
 
-/** Una URL de Jitsi siempre se puede incrustar; el resto, no. */
+/**
+ * Crea una sala en Daily con caducidad = duración + 2 min de margen. La sala
+ * es pública (cualquiera con el enlace entra, sin login) y se auto-expulsa al
+ * caducar. Devuelve la URL embebible.
+ */
+async function createDailyRoom(durationMin: number): Promise<string> {
+  if (!env.DAILY_API_KEY) {
+    throw new AppError(
+      500,
+      "VIDEO_MISCONFIGURED",
+      "El proveedor de vídeo (Daily) no está configurado.",
+    );
+  }
+  const exp = Math.floor(Date.now() / 1000) + durationMin * 60 + 120;
+  const res = await fetch("https://api.daily.co/v1/rooms", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.DAILY_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      properties: {
+        exp,
+        eject_at_room_exp: true,
+        enable_prejoin_ui: false,
+      },
+    }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new AppError(
+      502,
+      "VIDEO_PROVIDER_ERROR",
+      `No se pudo crear la sala de vídeo (Daily ${res.status}).`,
+      detail.slice(0, 200),
+    );
+  }
+  const data = (await res.json()) as { url?: string };
+  if (!data.url) {
+    throw new AppError(502, "VIDEO_PROVIDER_ERROR", "Daily no devolvió URL.");
+  }
+  return data.url;
+}
+
+/** Salas de Daily y Jitsi se pueden incrustar; Teams no. */
 export function isEmbeddable(joinUrl: string | null): boolean {
-  return Boolean(joinUrl && joinUrl.includes(env.JITSI_HOST));
+  return Boolean(
+    joinUrl &&
+      (joinUrl.includes(".daily.co") || joinUrl.includes(env.JITSI_HOST)),
+  );
 }
 
 export const SESSION_ERRORS = {
@@ -94,7 +140,10 @@ export async function startSession(
     }
 
     const totalCents = consultant.price_cents_per_min * input.durationMin;
-    const { joinUrl } = buildJoinUrl(consultant.teams_join_url);
+    const joinUrl = await createRoom(
+      input.durationMin,
+      consultant.teams_join_url,
+    );
     const expiresAt = new Date(Date.now() + input.durationMin * 60_000);
 
     // La sesión se crea primero para tener su id como referencia del cargo.

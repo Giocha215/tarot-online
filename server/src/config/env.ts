@@ -29,10 +29,14 @@ const envSchema = z.object({
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
 
   // --- Proveedor de vídeo ---
-  // 'jitsi' (demo): sala embebible en un iframe, sin cuenta ni claves.
-  // 'teams': usa el joinWebUrl de la consultora; NO embebe (Teams bloquea
-  // iframes) → el frontend muestra un botón "Abrir en Teams".
-  VIDEO_PROVIDER: z.enum(["jitsi", "teams"]).default("jitsi"),
+  // 'daily' (recomendado): salas embebibles y anónimas, dos personas se
+  //   conectan sin login ni moderador. Requiere DAILY_API_KEY.
+  // 'jitsi': sala embebible, pero meet.jit.si exige moderador autenticado.
+  // 'teams': usa el joinWebUrl; NO embebe (Teams bloquea iframes).
+  VIDEO_PROVIDER: z.enum(["daily", "jitsi", "teams"]).default("jitsi"),
+  // Clave de API de Daily (dashboard.daily.co → Developers). Solo si
+  // VIDEO_PROVIDER=daily.
+  DAILY_API_KEY: z.string().default(""),
   // Host de Jitsi. El público (meet.jit.si) sirve para demo.
   JITSI_HOST: z.string().default("meet.jit.si"),
 

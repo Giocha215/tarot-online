@@ -254,7 +254,11 @@ function CallRoom() {
         {v.active.embeddable && v.active.joinUrl ? (
           <iframe
             title={t.video.title}
-            src={`${v.active.joinUrl}#config.prejoinPageEnabled=false`}
+            src={
+              v.active.joinUrl.includes("jit.si")
+                ? `${v.active.joinUrl}#config.prejoinPageEnabled=false`
+                : v.active.joinUrl
+            }
             className="h-full w-full border-0"
             allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
           />

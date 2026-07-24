@@ -105,6 +105,33 @@ export default {
           '0%, 100%': { opacity: '0.2', transform: 'scale(0.8)' },
           '50%': { opacity: '1', transform: 'scale(1.15)' },
         },
+        // Barajado: oscilación de rotación de todo el mazo mientras se mezcla.
+        'shuffle-deck': {
+          '0%, 100%': { transform: 'rotate(-9deg) translateX(-2%)' },
+          '25%': { transform: 'rotate(6deg) translateX(3%)' },
+          '50%': { transform: 'rotate(-5deg) translateX(-3%)' },
+          '75%': { transform: 'rotate(8deg) translateX(2%)' },
+        },
+        // Cada carta del mazo se contonea con su propio desfase.
+        'card-sway': {
+          '0%, 100%': { transform: 'rotate(-4deg) translateY(0)' },
+          '50%': { transform: 'rotate(4deg) translateY(-6px)' },
+        },
+        // Volteo 3D del anverso al revelar.
+        'card-flip': {
+          '0%': { transform: 'rotateY(0deg)' },
+          '100%': { transform: 'rotateY(180deg)' },
+        },
+        // Reparto: la carta entra desde el mazo hasta su sitio.
+        'deal-in': {
+          '0%': { opacity: '0', transform: 'translateY(30px) rotate(-8deg) scale(0.85)' },
+          '100%': { opacity: '1', transform: 'translateY(0) rotate(0) scale(1)' },
+        },
+        // Elevación suave de la carta ya revelada.
+        'card-rise': {
+          '0%': { transform: 'translateY(10px)', opacity: '0.6' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
@@ -115,6 +142,11 @@ export default {
         'flip-in': 'flip-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both',
         marquee: 'marquee 34s linear infinite',
         twinkle: 'twinkle 4s ease-in-out infinite',
+        'shuffle-deck': 'shuffle-deck 0.5s ease-in-out infinite',
+        'card-sway': 'card-sway 2.2s ease-in-out infinite',
+        'card-flip': 'card-flip 0.7s cubic-bezier(0.4, 0, 0.2, 1) both',
+        'deal-in': 'deal-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'card-rise': 'card-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
       container: {
       center: true,

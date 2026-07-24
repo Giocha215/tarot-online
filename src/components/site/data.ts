@@ -57,6 +57,9 @@ export const ZODIAC: ZodiacSign[] = [
 // Index-matched to translations[lang].tarot
 export const TAROT_SYMBOLS = ["☀", "✦", "◍", "♀", "⊕", "∞"];
 
+/** Numeral del arcano mayor correspondiente, mismo orden que TAROT_SYMBOLS. */
+export const TAROT_NUMERALS = ["XIX", "XVII", "X", "III", "XXI", "XI"];
+
 // Index-matched by `slug` to translations[lang].spreads.items
 export interface Spread {
   slug: "dia" | "siNo" | "eleccion" | "amor" | "relaciones" | "pregunta" | "mensual";

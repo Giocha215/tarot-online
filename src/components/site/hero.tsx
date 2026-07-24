@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/i18n/language-provider";
 import type { Dict } from "@/lib/i18n";
-import { TAROT_SYMBOLS } from "./data";
+import { TAROT_NUMERALS, TAROT_SYMBOLS } from "./data";
 import { ArrowRight, Clock, Sparkles } from "./icons";
 import { TarotBack, TarotFront } from "./tarot-card";
 
@@ -34,7 +34,11 @@ export function Hero() {
 
   const card =
     cardIdx !== null
-      ? { symbol: TAROT_SYMBOLS[cardIdx], ...t.tarot[cardIdx] }
+      ? {
+          index: cardIdx,
+          numeral: TAROT_NUMERALS[cardIdx] ?? "",
+          ...t.tarot[cardIdx],
+        }
       : null;
 
   return (
@@ -119,9 +123,7 @@ export function Hero() {
                 </div>
                 {/* front */}
                 <div className="backface-hidden rotate-y-180 absolute inset-0">
-                  {card && (
-                    <TarotFront card={card} label={t.hero.arcano.toUpperCase()} />
-                  )}
+                  {card && <TarotFront card={card} />}
                 </div>
               </button>
             </div>

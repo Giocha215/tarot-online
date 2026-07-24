@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { SunMark } from "./icons";
+import { TarotArt } from "./tarot-art";
 
 /**
  * Reverso y anverso de carta, compartidos por el hero y por el selector de
@@ -78,61 +79,75 @@ export function TarotBack({
   );
 }
 
+/**
+ * Anverso ilustrado. Sigue la estructura de una carta de tarot clásica:
+ * papel crema, doble filete, numeral romano arriba y cartela con el nombre
+ * abajo, con la escena ocupando el centro.
+ */
 export function TarotFront({
   card,
-  label,
   compact,
 }: {
-  card: { symbol: string; name: string };
-  /** Rótulo superior/inferior, p. ej. "ARCANO". */
-  label: string;
+  card: {
+    /** Índice del arcano; selecciona la ilustración. */
+    index: number;
+    name: string;
+    numeral: string;
+  };
   compact?: boolean;
 }) {
   return (
     <div
       className={cn(
-        "relative flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-2xl border-2 border-accent1/50 shadow-glow",
-        compact ? "p-2" : "p-4",
+        "relative h-full w-full overflow-hidden rounded-xl shadow-card ring-1 ring-ink/15",
+        compact ? "p-[3px]" : "p-[5px]",
       )}
       style={{
+        // Papel crema con un veteado suave: da textura sin usar imágenes.
         backgroundImage:
-          "radial-gradient(120% 90% at 50% 0%, hsl(var(--c-gold) / 0.4), transparent 60%), linear-gradient(160deg, hsl(var(--c-surface)), hsl(var(--c-bg-alt)))",
+          "radial-gradient(120% 80% at 30% 0%, hsl(var(--c-gold) / 0.22), transparent 60%), linear-gradient(155deg, #fbf6e9, #f3e9d2)",
       }}
     >
-      <span
-        className={cn(
-          "font-cinzel tracking-[0.3em] text-accent1",
-          compact ? "text-[0.4rem]" : "text-[0.55rem]",
-        )}
-      >
-        {label}
-      </span>
-      <div className="flex flex-col items-center gap-2">
-        <span
+      <div className="flex h-full w-full flex-col rounded-lg border border-ink/25">
+        {/* numeral */}
+        <div className={cn("shrink-0 text-center", compact ? "pt-0.5" : "pt-1.5")}>
+          <span
+            className={cn(
+              "font-cinzel font-semibold tracking-[0.2em] text-ink/80",
+              compact ? "text-[0.34rem]" : "text-[0.6rem]",
+            )}
+          >
+            {card.numeral}
+          </span>
+        </div>
+
+        {/* escena */}
+        <div
           className={cn(
-            "flex items-center justify-center rounded-full border border-accent1/40 bg-base/50 text-accent1",
-            compact ? "h-10 w-10 text-xl" : "h-20 w-20 text-4xl",
+            "relative min-h-0 flex-1 overflow-hidden border-y border-ink/20",
+            compact ? "mx-0.5 my-0.5" : "mx-1.5 my-1",
           )}
         >
-          {card.symbol}
-        </span>
-        <span
+          <TarotArt index={card.index} />
+        </div>
+
+        {/* cartela con el nombre */}
+        <div
           className={cn(
-            "text-center font-serif font-semibold text-ink",
-            compact ? "px-1 text-[0.7rem] leading-tight" : "text-2xl",
+            "flex shrink-0 items-center justify-center",
+            compact ? "h-[14%] px-0.5" : "h-[13%] px-1.5",
           )}
         >
-          {card.name}
-        </span>
+          <span
+            className={cn(
+              "line-clamp-2 text-center font-cinzel font-semibold uppercase leading-none tracking-[0.1em] text-ink/85",
+              compact ? "text-[0.3rem]" : "text-[0.52rem]",
+            )}
+          >
+            {card.name}
+          </span>
+        </div>
       </div>
-      <span
-        className={cn(
-          "rotate-180 font-cinzel tracking-[0.3em] text-accent1",
-          compact ? "text-[0.4rem]" : "text-[0.55rem]",
-        )}
-      >
-        {label}
-      </span>
     </div>
   );
 }

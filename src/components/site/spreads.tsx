@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { cn } from "@/lib/utils";
-import { DECK_SIZE, SPREADS, TAROT_SYMBOLS, type Spread } from "./data";
+import {
+  DECK_SIZE,
+  SPREADS,
+  TAROT_NUMERALS,
+  TAROT_SYMBOLS,
+  type Spread,
+} from "./data";
 import { ArrowRight } from "./icons";
 import { TarotBack, TarotFront } from "./tarot-card";
 
@@ -24,11 +30,14 @@ function shuffled(n: number): number[] {
 // ------------------------------------------------------------------
 function SpreadCover({
   spread,
+  index,
   name,
   desc,
   onSelect,
 }: {
   spread: Spread;
+  /** Carta ilustrada que representa la tirada en la parrilla. */
+  index: number;
   name: string;
   desc: string;
   onSelect: () => void;
@@ -39,10 +48,13 @@ function SpreadCover({
       onClick={onSelect}
       className="group flex w-[150px] shrink-0 flex-col items-center text-center outline-none sm:w-[160px]"
     >
-      <div className="h-[210px] w-[135px] transition-transform duration-300 group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5 sm:h-[225px] sm:w-[145px]">
+      <div className="h-[210px] w-[135px] transition-transform duration-300 group-hover:-translate-y-1.5 group-hover:rotate-1 group-focus-visible:-translate-y-1.5 sm:h-[225px] sm:w-[145px]">
         <TarotFront
-          card={{ symbol: spread.symbol, name: "" }}
-          label="TAROT"
+          card={{
+            index,
+            numeral: TAROT_NUMERALS[index] ?? "",
+            name: spread.cards > 1 ? `${spread.cards} cartas` : name,
+          }}
         />
       </div>
       <p className="mt-3 font-serif text-[1.02rem] font-semibold leading-tight text-accent1">
@@ -124,7 +136,8 @@ function SpreadFlow({
   const chosen = picked.map((position) => {
     const idx = dealt[position] ?? 0;
     return {
-      symbol: TAROT_SYMBOLS[idx] ?? "✦",
+      index: idx,
+      numeral: TAROT_NUMERALS[idx] ?? "",
       ...(t.tarot[idx] ?? t.tarot[0]),
     };
   });
@@ -219,8 +232,14 @@ function SpreadFlow({
             )}
 
             {/* mazo en abanico */}
-            <div className="mt-8 w-full overflow-x-auto pb-4">
-              <div className="mx-auto flex w-max px-4">
+            <div className="mt-8 w-full overflow-x-auto overflow-y-visible pb-6 pt-4">
+              <div
+                className={cn(
+                  "mx-auto flex w-max px-4",
+                  // Mientras baraja, todo el mazo oscila como un bloque.
+                  shuffling && "origin-bottom animate-shuffle-deck",
+                )}
+              >
                 {Array.from({ length: DECK_SIZE }, (_, i) => i).map((pos) => {
                   const isPicked = picked.includes(pos);
                   const done = picked.length >= spread.cards;
@@ -231,15 +250,24 @@ function SpreadFlow({
                       onClick={() => pick(pos)}
                       disabled={shuffling || done || isPicked}
                       aria-label={`${t.spreads.cardLabel} ${pos + 1}`}
+                      style={
+                        shuffling
+                          ? {
+                              // Cada carta se contonea con su propio desfase:
+                              // el mazo deja de moverse "en bloque".
+                              animationDelay: `${(pos % 8) * 0.06}s`,
+                            }
+                          : undefined
+                      }
                       className={cn(
-                        "-ml-8 h-[150px] w-[100px] shrink-0 rounded-2xl transition-all duration-300 first:ml-0",
+                        "-ml-8 h-[150px] w-[100px] shrink-0 rounded-xl transition-all duration-300 first:ml-0",
                         "hover:z-10 focus-visible:z-10 focus-visible:outline-none",
+                        shuffling && "origin-bottom animate-card-sway",
                         !shuffling &&
                           !done &&
                           !isPicked &&
-                          "hover:-translate-y-4 focus-visible:-translate-y-4",
-                        isPicked && "-translate-y-6 opacity-40",
-                        shuffling && "animate-pulse",
+                          "hover:-translate-y-5 hover:rotate-2 focus-visible:-translate-y-5",
+                        isPicked && "-translate-y-8 scale-95 opacity-30",
                       )}
                     >
                       <TarotBack compact />
@@ -258,13 +286,11 @@ function SpreadFlow({
               {chosen.map((card, i) => (
                 <div
                   key={`${card.name}-${i}`}
-                  className="flex flex-col items-center"
+                  className="flex animate-deal-in flex-col items-center"
+                  style={{ animationDelay: `${i * 0.12}s` }}
                 >
                   <div className="h-[230px] w-[155px]">
-                    <TarotFront
-                      card={card}
-                      label={t.hero.arcano.toUpperCase()}
-                    />
+                    <TarotFront card={card} />
                   </div>
                   <p className="mt-2 text-[0.8rem] text-subtle">
                     {t.spreads.cardLabel} {i + 1}
@@ -333,10 +359,11 @@ export function Spreads() {
         </p>
 
         <div className="mt-8 flex gap-5 overflow-x-auto pb-3 lg:justify-center lg:overflow-visible lg:flex-wrap">
-          {SPREADS.map((s) => (
+          {SPREADS.map((s, i) => (
             <SpreadCover
               key={s.slug}
               spread={s}
+              index={i}
               name={t.spreads.items[s.slug].name}
               desc={t.spreads.items[s.slug].desc}
               onSelect={() => setActive(s)}

@@ -67,15 +67,50 @@ El frontend debe leer `code` (estable), no `message` (traducible).
   un token ya revocado se asume robo y se revoca **toda la familia** de esa
   sesión.
 
+## Desarrollo local con Docker
+
+```bash
+docker run -d --name tarot-pg --restart unless-stopped \
+  -e POSTGRES_USER=tarot -e POSTGRES_PASSWORD=tarot_dev_pw -e POSTGRES_DB=tarot \
+  -p 5434:5432 -v tarot_pgdata:/var/lib/postgresql/data postgres:16-alpine
+```
+
+En `.env`:
+
+```
+DATABASE_URL=postgresql://tarot:tarot_dev_pw@localhost:5434/tarot
+DATABASE_SSL=false
+```
+
+El puerto es 5434 y no 5432 para no chocar con otros Postgres que ya
+tengas corriendo.
+
 ## Despliegue en Railway
 
-1. Servicio nuevo → *Root Directory* `server`.
-2. Build `npm run build`, Start `npm start`.
-3. Variables: `DATABASE_URL` (referencia al Postgres del proyecto),
-   `DATABASE_SSL=true`, `JWT_SECRET`, `NODE_ENV=production`,
-   `CORS_ORIGIN=https://tu-frontend`.
+1. Servicio nuevo desde el repo de GitHub.
+2. *Settings → Root Directory*: `server`. Sin esto Railway intenta
+   construir el frontend Next.js de la raíz y falla.
+3. Variables (*Settings → Variables*):
 
-`npm start` ejecuta las migraciones pendientes al arrancar.
+   | Variable        | Valor                                    |
+   | --------------- | ---------------------------------------- |
+   | `DATABASE_URL`  | `${{Postgres.DATABASE_URL}}` (referencia) |
+   | `DATABASE_SSL`  | `true`                                    |
+   | `JWT_SECRET`    | secreto propio, ver arriba                |
+   | `NODE_ENV`      | `production`                              |
+   | `CORS_ORIGIN`   | la URL del frontend, sin barra final      |
+
+   `PORT` lo inyecta Railway solo; no lo definas a mano.
+
+4. *Networking → Generate Domain* para obtener la URL pública.
+5. En el frontend, `NEXT_PUBLIC_API_URL` apuntando a ese dominio.
+
+`npm start` aplica las migraciones pendientes al arrancar. Con varias
+réplicas simultáneas conviene moverlo a un paso de release aparte, para que
+no compitan por aplicar la misma migración.
 
 Con frontend y API en dominios distintos la cookie sale con
-`SameSite=None; Secure`, que exige HTTPS en ambos.
+`SameSite=None; Secure`, que exige HTTPS en ambos. `CORS_ORIGIN` debe
+coincidir **exactamente** con el origen del navegador: si no, el navegador
+descarta la cookie sin avisar y el login parece funcionar pero la sesión no
+sobrevive al refresco.

@@ -59,6 +59,17 @@ const envSchema = z.object({
 
   // Máximo por recarga en modo demo, en céntimos (evita saldos absurdos).
   DEMO_TOPUP_MAX_CENTS: z.coerce.number().int().positive().default(50_000),
+
+  // --- Recuperación de contraseña por email ---
+  // URL base del frontend, para construir el enlace de recuperación.
+  APP_URL: z.string().default("http://localhost:3000"),
+  // Resend (resend.com) para enviar el email. Vacío = modo demo: el enlace
+  // se devuelve en la respuesta y se muestra en pantalla, sin enviar correo.
+  RESEND_API_KEY: z.string().default(""),
+  // Remitente del email. En modo demo no se usa.
+  EMAIL_FROM: z.string().default("Tarot Online <onboarding@resend.dev>"),
+  // Vida del enlace de recuperación, en minutos.
+  RESET_TOKEN_TTL_MIN: z.coerce.number().int().positive().default(30),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -81,6 +92,9 @@ export const env = {
     .filter(Boolean),
   // Sin clave de Stripe, la recarga funciona en modo demo (acredita sin cobrar).
   stripeEnabled: raw.STRIPE_SECRET_KEY.length > 0,
+  // Sin clave de Resend, la recuperación funciona en modo demo (muestra el
+  // enlace en pantalla en vez de enviarlo por correo).
+  emailEnabled: raw.RESEND_API_KEY.length > 0,
 } as const;
 
 // En producción un secreto de ejemplo es una puerta abierta: mejor no arrancar.

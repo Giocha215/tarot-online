@@ -119,6 +119,14 @@ function LoginForm() {
             </button>
           </div>
           <FieldError message={fieldErrors.password} />
+          <div className="mt-1.5 text-right">
+            <Link
+              href="/recuperar"
+              className="text-[0.82rem] text-ink-soft underline-offset-4 hover:text-accent1 hover:underline"
+            >
+              {t.auth.forgotPassword}
+            </Link>
+          </div>
         </div>
 
         <button

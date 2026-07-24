@@ -160,3 +160,37 @@ export async function changePassword(
     next(err);
   }
 }
+
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { demoResetUrl } = await authService.requestPasswordReset(
+      req.body.email,
+    );
+    // Mensaje genérico: no revela si el email existe. `demoResetUrl` solo
+    // llega en modo demo (sin servicio de correo configurado).
+    res.json({
+      message:
+        "Si el email está registrado, te hemos enviado un enlace para recuperar la contraseña.",
+      demoResetUrl,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await authService.resetPassword(req.body.token, req.body.newPassword);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+}

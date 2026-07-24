@@ -1,13 +1,15 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import { env } from "../../config/env.js";
-import { AUTH_ERRORS, conflict, unauthorized } from "../../utils/errors.js";
+import { AUTH_ERRORS, badRequest, conflict, unauthorized } from "../../utils/errors.js";
 import {
   generateRefreshToken,
   hashRefreshToken,
   refreshTokenExpiry,
   signAccessToken,
 } from "../../utils/tokens.js";
+import { sendPasswordResetEmail } from "./email.service.js";
+import * as resetRepo from "./password-reset.repository.js";
 import * as refreshRepo from "./refresh-token.repository.js";
 import * as userRepo from "./user.repository.js";
 import type { PublicUser } from "./user.repository.js";
@@ -187,4 +189,61 @@ export async function changePassword(
   await userRepo.updatePasswordHash(userId, hash);
   // Cambiar contraseña cierra todas las sesiones: es el punto del cambio.
   await refreshRepo.revokeAllForUser(userId);
+}
+
+/**
+ * Solicita recuperar la contraseña. Genera un token de un solo uso, lo guarda
+ * hasheado y envía el enlace por email.
+ *
+ * Devuelve SIEMPRE éxito, exista o no el email: así no se filtra qué correos
+ * están registrados. En modo demo (sin Resend) devuelve el enlace para
+ * mostrarlo en pantalla.
+ */
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ demoResetUrl: string | null }> {
+  const user = await userRepo.findByEmail(email);
+
+  // Si no existe, se corta aquí pero se responde igual (sin revelar nada).
+  if (!user) return { demoResetUrl: null };
+
+  // Un solo enlace válido a la vez: se invalidan los anteriores.
+  await resetRepo.invalidateForUser(user.id);
+
+  const token = crypto.randomBytes(32).toString("base64url");
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const expiresAt = new Date(Date.now() + env.RESET_TOKEN_TTL_MIN * 60_000);
+
+  await resetRepo.insertResetToken({ userId: user.id, tokenHash, expiresAt });
+
+  const resetUrl = `${env.APP_URL.replace(/\/$/, "")}/restablecer?token=${token}`;
+  await sendPasswordResetEmail(user.email, resetUrl);
+
+  // En modo demo se devuelve el enlace; con email real, nunca.
+  return { demoResetUrl: env.emailEnabled ? null : resetUrl };
+}
+
+/**
+ * Restablece la contraseña con el token del enlace. Un solo uso: se marca
+ * usado y se cierran todas las sesiones del usuario.
+ */
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const row = await resetRepo.findByHash(tokenHash);
+
+  if (!row || row.used_at || row.expires_at.getTime() <= Date.now()) {
+    throw badRequest(
+      "RESET_TOKEN_INVALID",
+      "El enlace de recuperación no es válido o ha caducado.",
+    );
+  }
+
+  const hash = await bcrypt.hash(newPassword, env.BCRYPT_ROUNDS);
+  await userRepo.updatePasswordHash(row.user_id, hash);
+  await resetRepo.markUsed(row.id);
+  // Recuperar contraseña cierra todas las sesiones abiertas.
+  await refreshRepo.revokeAllForUser(row.user_id);
 }

@@ -9,8 +9,10 @@ import { validateBody } from "../../middleware/validate.js";
 import * as controller from "./auth.controller.js";
 import {
   changePasswordSchema,
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from "./auth.schemas.js";
 
 export const authRouter = Router();
@@ -32,6 +34,20 @@ authRouter.post(
 
 authRouter.post("/refresh", refreshLimiter, controller.refresh);
 authRouter.post("/logout", controller.logout);
+
+// Recuperación de contraseña (públicas, con límite de intentos).
+authRouter.post(
+  "/forgot-password",
+  loginLimiter,
+  validateBody(forgotPasswordSchema),
+  controller.forgotPassword,
+);
+authRouter.post(
+  "/reset-password",
+  loginLimiter,
+  validateBody(resetPasswordSchema),
+  controller.resetPassword,
+);
 
 // --- protegidas ---
 authRouter.get("/me", authenticate, controller.me);

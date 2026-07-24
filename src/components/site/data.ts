@@ -57,6 +57,28 @@ export const ZODIAC: ZodiacSign[] = [
 // Index-matched to translations[lang].tarot
 export const TAROT_SYMBOLS = ["☀", "✦", "◍", "♀", "⊕", "∞"];
 
+// Index-matched by `slug` to translations[lang].spreads.items
+export interface Spread {
+  slug: "dia" | "siNo" | "eleccion" | "amor" | "relaciones" | "pregunta" | "mensual";
+  /** Cuántas cartas elige el usuario en esta tirada. */
+  cards: number;
+  /** Símbolo decorativo de la portada. */
+  symbol: string;
+}
+
+export const SPREADS: Spread[] = [
+  { slug: "dia", cards: 1, symbol: "☀" },
+  { slug: "siNo", cards: 1, symbol: "✦" },
+  { slug: "eleccion", cards: 2, symbol: "⚖" },
+  { slug: "amor", cards: 3, symbol: "♥" },
+  { slug: "relaciones", cards: 3, symbol: "∞" },
+  { slug: "pregunta", cards: 3, symbol: "◍" },
+  { slug: "mensual", cards: 6, symbol: "☾" },
+];
+
+/** Cartas boca abajo que se reparten en abanico para elegir. */
+export const DECK_SIZE = 32;
+
 // Index-matched to translations[lang].blogPosts
 export interface BlogPost {
   image: string;

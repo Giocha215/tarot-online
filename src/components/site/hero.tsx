@@ -4,8 +4,9 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/i18n/language-provider";
 import type { Dict } from "@/lib/i18n";
-import { TAROT_SYMBOLS } from "./data";
-import { ArrowRight, Clock, Sparkles, SunMark } from "./icons";
+import { TAROT_NUMERALS, TAROT_SYMBOLS } from "./data";
+import { ArrowRight, Clock, Sparkles } from "./icons";
+import { TarotBack, TarotFront } from "./tarot-card";
 
 export function Hero() {
   const { t } = useLanguage();
@@ -33,7 +34,11 @@ export function Hero() {
 
   const card =
     cardIdx !== null
-      ? { symbol: TAROT_SYMBOLS[cardIdx], ...t.tarot[cardIdx] }
+      ? {
+          index: cardIdx,
+          numeral: TAROT_NUMERALS[cardIdx] ?? "",
+          ...t.tarot[cardIdx],
+        }
       : null;
 
   return (
@@ -118,7 +123,7 @@ export function Hero() {
                 </div>
                 {/* front */}
                 <div className="backface-hidden rotate-y-180 absolute inset-0">
-                  {card && <TarotFront card={card} t={t} />}
+                  {card && <TarotFront card={card} />}
                 </div>
               </button>
             </div>
@@ -154,83 +159,5 @@ export function Hero() {
         </div>
       </section>
     </>
-  );
-}
-
-function TarotBack({ pulsing }: { pulsing?: boolean }) {
-  return (
-    <div
-      className={cn(
-        "relative h-full w-full overflow-hidden rounded-2xl border-2 border-gold/50 p-3 shadow-glow",
-        pulsing && "animate-pulse",
-      )}
-      style={{
-        backgroundImage:
-          "radial-gradient(120% 100% at 50% 0%, hsl(var(--c-accent) / 0.35), transparent 55%), linear-gradient(160deg, hsl(var(--c-ink)), hsl(var(--c-ink) / 0.85))",
-      }}
-    >
-      <div className="flex h-full w-full items-center justify-center rounded-xl border border-gold/30">
-        <div className="relative flex flex-col items-center gap-3 text-gold">
-          <SunMark className="h-16 w-16 animate-spin-slow" />
-          <span className="font-cinzel text-[0.6rem] tracking-[0.4em]">
-            TAROT
-          </span>
-        </div>
-        {/* stars */}
-        {[
-          [14, 20],
-          [80, 30],
-          [24, 78],
-          [72, 82],
-          [50, 12],
-        ].map(([x, y], i) => (
-          <span
-            key={i}
-            className="absolute text-gold animate-twinkle"
-            style={{
-              left: `${x}%`,
-              top: `${y}%`,
-              animationDelay: `${i * 0.6}s`,
-              fontSize: "0.7rem",
-            }}
-          >
-            ✦
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TarotFront({
-  card,
-  t,
-}: {
-  card: { symbol: string; name: string; text: string };
-  t: Dict;
-}) {
-  return (
-    <div
-      className="relative flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-2xl border-2 border-accent1/50 p-4 shadow-glow"
-      style={{
-        backgroundImage:
-          "radial-gradient(120% 90% at 50% 0%, hsl(var(--c-gold) / 0.4), transparent 60%), linear-gradient(160deg, hsl(var(--c-surface)), hsl(var(--c-bg-alt)))",
-      }}
-    >
-      <span className="font-cinzel text-[0.55rem] tracking-[0.3em] text-accent1">
-        {t.hero.arcano.toUpperCase()}
-      </span>
-      <div className="flex flex-col items-center gap-2">
-        <span className="flex h-20 w-20 items-center justify-center rounded-full border border-accent1/40 bg-base/50 text-4xl text-accent1">
-          {card.symbol}
-        </span>
-        <span className="font-serif text-2xl font-semibold text-ink">
-          {card.name}
-        </span>
-      </div>
-      <span className="font-cinzel text-[0.55rem] tracking-[0.3em] text-accent1 rotate-180">
-        {t.hero.arcano.toUpperCase()}
-      </span>
-    </div>
   );
 }

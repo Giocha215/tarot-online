@@ -4,19 +4,19 @@
 
 @layer base {
   :root {
-    /* ============ Arcano Carmesí palette ============ */
-    --c-bg: 222 37% 19%; /* #1f2a44 */
-    --c-bg-alt: 0 13% 9%; /* #1a1414 */
-    --c-surface: 0 13% 9%; /* #1a1414 */
-    --c-ink: 40 37% 92%; /* #f2ede3 */
-    --c-ink-soft: 33 59% 77%; /* #e7c7a1 */
-    --c-muted: 33 28% 67%;
-    --c-accent: 352 64% 33%; /* #8b1e2d */
-    --c-accent-2: 352 64% 26%;
-    --c-gold: 46 67% 47%; /* #c9a227 */
-    --c-teal: 46 67% 47%; /* gold accent, no teal in this palette */
-    --c-line: 46 67% 47%; /* #c9a227 */
-    --radius: 0.9rem;
+    /* ============ Floresta Sábia — paleta única del sitio ============ */
+    --c-bg: 96 30% 96%; /* menta muy claro */
+    --c-bg-alt: 100 32% 93%;
+    --c-surface: 90 44% 99%;
+    --c-ink: 158 42% 15%; /* verde muy oscuro, texto principal */
+    --c-ink-soft: 160 20% 30%;
+    --c-muted: 150 10% 46%;
+    --c-accent: 158 56% 42%; /* esmeralda, botones y enlaces */
+    --c-accent-2: 172 60% 40%;
+    --c-gold: 44 70% 64%; /* dorado de los acentos */
+    --c-teal: 168 44% 44%;
+    --c-line: 110 24% 84%;
+    --radius: 0.7rem;
 
     /* shadcn compatibility tokens mapped onto the tarot palette */
     --background: var(--c-bg);

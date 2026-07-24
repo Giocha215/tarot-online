@@ -1,14 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Menu, SunMark } from "./icons";
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <a href="#top" className={cn("flex items-center gap-2.5", className)}>
+    <Link href="/" className={cn("flex items-center gap-2.5", className)}>
       <span className="text-gold">
         <SunMark className="h-9 w-9 text-accent1 drop-shadow-[0_2px_6px_hsl(var(--c-accent)/0.4)]" />
       </span>
@@ -17,15 +19,16 @@ export function Logo({ className }: { className?: string }) {
           TAROT
         </span>
         <span className="font-cinzel text-[0.62rem] tracking-[0.42em] text-accent1">
-          ONLINE
+          DEMO
         </span>
       </span>
-    </a>
+    </Link>
   );
 }
 
 export function Header() {
   const { t } = useLanguage();
+  const { isAuthenticated, user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -72,23 +75,28 @@ export function Header() {
             <LanguageSwitcher />
           </div>
 
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-theme"))}
-            className="hidden items-center gap-2 rounded-full border border-line bg-surface/70 px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface sm:inline-flex"
-          >
-            <span className="flex gap-0.5">
-              <span className="h-3 w-3 rounded-full bg-accent1" />
-              <span className="h-3 w-3 rounded-full bg-gold" />
-              <span className="h-3 w-3 rounded-full bg-teal" />
-            </span>
-            {t.header.tema}
-          </button>
-
-          <a href="#top" className="btn-flame px-5 py-2.5">
-            <LogInIcon className="h-4 w-4" />
-            {t.header.entrar}
-          </a>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard" className="btn-flame px-5 py-2.5">
+                <UserIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {user?.displayName ?? t.header.minhaConta}
+                </span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="hidden rounded-full border border-line bg-surface/70 px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface sm:inline-flex"
+              >
+                {t.header.sair}
+              </button>
+            </div>
+          ) : (
+            <Link href="/login" className="btn-flame px-5 py-2.5">
+              <LogInIcon className="h-4 w-4" />
+              {t.header.entrar}
+            </Link>
+          )}
 
           <button
             type="button"
@@ -114,18 +122,37 @@ export function Header() {
                 {item.label}
               </a>
             ))}
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-lg px-2 py-3 text-[0.95rem] font-medium text-accent1"
+                >
+                  {t.header.minhaConta}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    logout();
+                  }}
+                  className="rounded-lg px-2 py-3 text-left text-[0.95rem] font-medium text-ink-soft"
+                >
+                  {t.header.sair}
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="rounded-lg px-2 py-3 text-[0.95rem] font-medium text-accent1"
+              >
+                {t.header.entrar}
+              </Link>
+            )}
             <div className="mt-2 flex items-center gap-2 px-2">
               <LanguageSwitcher />
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileOpen(false);
-                  window.dispatchEvent(new Event("open-theme"));
-                }}
-                className="rounded-full border border-line bg-surface/70 px-3.5 py-2 text-sm font-medium text-accent1"
-              >
-                {t.header.personalizarTema}
-              </button>
             </div>
           </nav>
         </div>
@@ -146,6 +173,23 @@ function LogInIcon({ className }: { className?: string }) {
       strokeLinejoin="round"
     >
       <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+    </svg>
+  );
+}
+
+function UserIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }

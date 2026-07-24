@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ThemeCustomizer } from "@/components/theme/theme-customizer";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { LanguageProvider } from "@/components/i18n/language-provider";
+import { VideoProvider } from "@/components/video/video-provider";
 
 export default function ClientBody({
   children,
@@ -18,10 +18,11 @@ export default function ClientBody({
 
   return (
     <LanguageProvider>
-      <ThemeProvider>
-        <div className="antialiased">{children}</div>
-        <ThemeCustomizer />
-      </ThemeProvider>
+      <AuthProvider>
+        <VideoProvider>
+          <div className="antialiased">{children}</div>
+        </VideoProvider>
+      </AuthProvider>
     </LanguageProvider>
   );
 }

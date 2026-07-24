@@ -57,6 +57,44 @@ export const ZODIAC: ZodiacSign[] = [
 // Index-matched to translations[lang].tarot
 export const TAROT_SYMBOLS = ["☀", "✦", "◍", "♀", "⊕", "∞"];
 
+/** Numeral del arcano mayor correspondiente, mismo orden que TAROT_SYMBOLS. */
+export const TAROT_NUMERALS = ["XIX", "XVII", "X", "III", "XXI", "VIII"];
+
+/**
+ * Ilustración real de cada carta (baraja Rider-Waite-Smith, dominio público;
+ * ver public/images/tarot/CREDITS.md). Mismo orden que TAROT_SYMBOLS.
+ */
+export const TAROT_IMAGES = [
+  "/images/tarot/sun.jpg",
+  "/images/tarot/star.jpg",
+  "/images/tarot/wheel.jpg",
+  "/images/tarot/empress.jpg",
+  "/images/tarot/world.jpg",
+  "/images/tarot/strength.jpg",
+];
+
+// Index-matched by `slug` to translations[lang].spreads.items
+export interface Spread {
+  slug: "dia" | "siNo" | "eleccion" | "amor" | "relaciones" | "pregunta" | "mensual";
+  /** Cuántas cartas elige el usuario en esta tirada. */
+  cards: number;
+  /** Símbolo decorativo de la portada. */
+  symbol: string;
+}
+
+export const SPREADS: Spread[] = [
+  { slug: "dia", cards: 1, symbol: "☀" },
+  { slug: "siNo", cards: 1, symbol: "✦" },
+  { slug: "eleccion", cards: 2, symbol: "⚖" },
+  { slug: "amor", cards: 3, symbol: "♥" },
+  { slug: "relaciones", cards: 3, symbol: "∞" },
+  { slug: "pregunta", cards: 3, symbol: "◍" },
+  { slug: "mensual", cards: 6, symbol: "☾" },
+];
+
+/** Cartas boca abajo que se reparten en abanico para elegir. */
+export const DECK_SIZE = 32;
+
 // Index-matched to translations[lang].blogPosts
 export interface BlogPost {
   image: string;

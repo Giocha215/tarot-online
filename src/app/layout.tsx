@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Cinzel, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import ClientBody from "./ClientBody";
-import Script from "next/script";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -28,8 +27,6 @@ export const metadata: Metadata = {
     "Consultas de tarot por chat, telefone ou email. Tarólogos certificados, resposta imediata e pagamento seguro por MB Way, Multibanco ou cartão.",
 };
 
-const themeInit = `(function(){try{var v=localStorage.getItem('tarot-theme-vars-arcano-carmesi');if(v){var o=JSON.parse(v);var r=document.documentElement;for(var k in o){r.style.setProperty(k,o[k]);}}}catch(e){}})();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,17 +38,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${cinzel.variable} ${cormorant.variable} ${inter.variable}`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
-        <Script
-          crossOrigin="anonymous"
-          src="//unpkg.com/react-grab/dist/index.global.js"
-        />
-        <Script
-          crossOrigin="anonymous"
-          src="//unpkg.com/same-runtime/dist/index.global.js"
-        />
-      </head>
+      <head />
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>
       </body>

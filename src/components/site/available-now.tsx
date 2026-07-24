@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/i18n/language-provider";
+import { useVideoCall } from "@/components/video/video-provider";
 import type { Dict } from "@/lib/i18n";
 import { CONSULTANTS, type Consultant } from "./data";
 import {
@@ -11,10 +12,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Mail,
   Phone,
   Star,
   Users,
+  Video,
 } from "./icons";
 
 function ChannelButton({
@@ -22,15 +23,18 @@ function ChannelButton({
   label,
   price,
   tone,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   price: string;
   tone: "flame" | "teal";
+  onClick?: () => void;
 }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className={cn(
         "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2.5 text-ink-soft transition-all hover:brightness-105 active:scale-[0.98]",
         tone === "flame"
@@ -55,6 +59,7 @@ function ChannelButton({
 
 function ConsultantCard({ c, t }: { c: Consultant; t: Dict }) {
   const tr = t.consultants[c.slug];
+  const video = useVideoCall();
   return (
     <article className="flex w-[320px] shrink-0 snap-start flex-col rounded-2xl border border-line bg-surface p-4 shadow-soft transition-shadow hover:shadow-card">
       <div className="flex items-start gap-3">
@@ -118,10 +123,17 @@ function ConsultantCard({ c, t }: { c: Consultant; t: Dict }) {
           tone="flame"
         />
         <ChannelButton
-          icon={<Mail className="h-3.5 w-3.5" />}
-          label={t.channels.email}
-          price="2,00€"
+          icon={<Video className="h-3.5 w-3.5" />}
+          label={t.channels.videochamada}
+          price="5,00€/min"
           tone="teal"
+          onClick={() =>
+            video.requestCall({
+              slug: c.slug,
+              name: c.name,
+              priceCentsPerMinute: 500,
+            })
+          }
         />
       </div>
     </article>

@@ -29,6 +29,13 @@ export const Mail = (p: P) => (
   </svg>
 );
 
+export const Video = (p: P) => (
+  <svg {...base} {...p}>
+    <rect x="2" y="6" width="14" height="12" rx="2" />
+    <path d="m22 8-6 4 6 4V8Z" />
+  </svg>
+);
+
 export const Star = (p: P) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...p}>
     <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.5l1.2-6.5L2.5 9.4 9 8.5 12 2.5z" />

@@ -83,6 +83,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         setActive({
           sessionId: session.id,
           joinUrl: session.joinUrl,
+          embeddable: session.embeddable,
           durationMin: session.durationMin,
           totalCents: session.totalCents,
           startedAt: session.startedAt,

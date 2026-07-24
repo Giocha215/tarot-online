@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { env } from "../../config/env.js";
 import { withTransaction } from "../../db/pool.js";
 import { publish } from "../../realtime/hub.js";
@@ -11,6 +12,32 @@ import {
 import * as consultantRepo from "../consultants/consultant.repository.js";
 import * as walletRepo from "../wallet/wallet.repository.js";
 import * as sessionRepo from "./session.repository.js";
+
+/**
+ * URL de la sala según el proveedor configurado.
+ *  - jitsi: sala única y embebible (iframe), sin cuenta ni claves.
+ *  - teams: enlace de la consultora o el por defecto (NO embebe).
+ * `embeddable` le dice al frontend si puede meterlo en un iframe o debe
+ * ofrecer "abrir en pestaña".
+ */
+function buildJoinUrl(teamsUrl: string | null): {
+  joinUrl: string | null;
+  embeddable: boolean;
+} {
+  if (env.VIDEO_PROVIDER === "jitsi") {
+    const room = `TarotOnline-${crypto.randomBytes(6).toString("hex")}`;
+    return { joinUrl: `https://${env.JITSI_HOST}/${room}`, embeddable: true };
+  }
+  return {
+    joinUrl: teamsUrl || env.TEAMS_DEFAULT_JOIN_URL || null,
+    embeddable: false,
+  };
+}
+
+/** Una URL de Jitsi siempre se puede incrustar; el resto, no. */
+export function isEmbeddable(joinUrl: string | null): boolean {
+  return Boolean(joinUrl && joinUrl.includes(env.JITSI_HOST));
+}
 
 export const SESSION_ERRORS = {
   CONSULTANT_NOT_FOUND: "CONSULTANT_NOT_FOUND",
@@ -67,7 +94,7 @@ export async function startSession(
     }
 
     const totalCents = consultant.price_cents_per_min * input.durationMin;
-    const joinUrl = consultant.teams_join_url || env.TEAMS_DEFAULT_JOIN_URL || null;
+    const { joinUrl } = buildJoinUrl(consultant.teams_join_url);
     const expiresAt = new Date(Date.now() + input.durationMin * 60_000);
 
     // La sesión se crea primero para tener su id como referencia del cargo.
@@ -112,6 +139,7 @@ export async function startSession(
   return {
     sessionId: result.session.id,
     joinUrl: result.session.join_url,
+    embeddable: isEmbeddable(result.session.join_url),
     durationMin: result.session.duration_min,
     totalCents: result.session.total_cents,
     startedAt: result.session.started_at.toISOString(),
@@ -186,12 +214,14 @@ export async function sweepExpiredSessions(): Promise<number> {
 
 export async function getHistory(userId: string) {
   const rows = await sessionRepo.listByUser(userId);
-  return rows.map(sessionRepo.toPublicSession);
+  return rows.map((r) => sessionRepo.toPublicSession(r, isEmbeddable(r.join_url)));
 }
 
 export async function getActive(userId: string) {
   const active = await sessionRepo.getActiveForUser(userId);
-  return active ? sessionRepo.toPublicSession(active) : null;
+  return active
+    ? sessionRepo.toPublicSession(active, isEmbeddable(active.join_url))
+    : null;
 }
 
 /** Recarga de saldo. En modo demo acredita directamente. */

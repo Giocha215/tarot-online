@@ -33,12 +33,16 @@ export interface PublicSession {
   totalCents: number;
   status: SessionStatus;
   joinUrl: string | null;
+  embeddable: boolean;
   startedAt: string;
   expiresAt: string;
   endedAt: string | null;
 }
 
-export function toPublicSession(row: SessionWithConsultant): PublicSession {
+export function toPublicSession(
+  row: SessionWithConsultant,
+  embeddable = false,
+): PublicSession {
   return {
     id: row.id,
     consultantName: row.consultant_name,
@@ -48,6 +52,7 @@ export function toPublicSession(row: SessionWithConsultant): PublicSession {
     totalCents: row.total_cents,
     status: row.status,
     joinUrl: row.join_url,
+    embeddable,
     startedAt: row.started_at.toISOString(),
     expiresAt: row.expires_at.toISOString(),
     endedAt: row.ended_at ? row.ended_at.toISOString() : null,

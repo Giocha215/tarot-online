@@ -28,6 +28,14 @@ const envSchema = z.object({
 
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
 
+  // --- Proveedor de vídeo ---
+  // 'jitsi' (demo): sala embebible en un iframe, sin cuenta ni claves.
+  // 'teams': usa el joinWebUrl de la consultora; NO embebe (Teams bloquea
+  // iframes) → el frontend muestra un botón "Abrir en Teams".
+  VIDEO_PROVIDER: z.enum(["jitsi", "teams"]).default("jitsi"),
+  // Host de Jitsi. El público (meet.jit.si) sirve para demo.
+  JITSI_HOST: z.string().default("meet.jit.si"),
+
   // --- Microsoft Teams ---
   // Enlace de sala por defecto si una consultora no tiene el suyo. Con la
   // integración de Graph API, este valor deja de usarse.

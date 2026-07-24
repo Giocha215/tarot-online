@@ -106,6 +106,17 @@ export function VideoOverlay() {
           </div>
         </div>
 
+        {/* errores que no son de saldo: consultora ocupada, red… */}
+        {v.errorCode &&
+          v.errorCode !== "INSUFFICIENT_BALANCE" &&
+          !insufficient && (
+            <p className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-[0.85rem] text-red-500">
+              {v.errorCode === "CONSULTANT_UNAVAILABLE"
+                ? t.video.unavailable
+                : t.auth.errors.NETWORK}
+            </p>
+          )}
+
         {insufficient ? (
           <div className="mt-4">
             <p className="text-[0.85rem] text-red-500">{t.video.insufficient}</p>
@@ -142,7 +153,7 @@ export function VideoOverlay() {
 
   // -------------------------------------------------------------- active
   if (v.phase === "active" && v.active) {
-    return <ActiveCallBar />;
+    return <CallRoom />;
   }
 
   // --------------------------------------------------------------- ended
@@ -172,8 +183,12 @@ export function VideoOverlay() {
   return null;
 }
 
-/** Barra fija de la videollamada en curso, con cuenta atrás. */
-function ActiveCallBar() {
+/**
+ * Sala de videollamada a pantalla completa: cabecera con temporizador y la
+ * llamada embebida en un iframe. Con Jitsi el iframe muestra el vídeo en vivo;
+ * si la sala no es embebible (Teams), se ofrece abrir en ventana nueva.
+ */
+function CallRoom() {
   const { t } = useLanguage();
   const v = useVideoCall();
   const remaining = useCountdown(v.active?.expiresAt ?? null, v.endCall);
@@ -181,29 +196,32 @@ function ActiveCallBar() {
   if (!v.active) return null;
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
-  const low = remaining <= 60; // último minuto en rojo
+  const low = remaining <= 60;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[55] border-t border-line bg-surface/95 backdrop-blur-md shadow-card">
-      <div className="container-tarot flex flex-wrap items-center justify-between gap-3 py-3">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-ink">
+      {/* cabecera: consultora + temporizador + terminar */}
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-black/40 px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal/60" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal" />
           </span>
-          <span className="text-[0.9rem] text-ink-soft">
+          <span className="text-[0.9rem] text-white/80">
             {t.video.inCall}{" "}
-            <span className="font-semibold text-ink">{v.active.consultant.name}</span>
+            <span className="font-semibold text-white">
+              {v.active.consultant.name}
+            </span>
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-[0.78rem] uppercase tracking-wide text-subtle">
+        <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5">
+          <span className="text-[0.72rem] uppercase tracking-wide text-white/50">
             {t.video.timeLeft}
           </span>
           <span
             className={`font-cinzel text-xl font-semibold tabular-nums ${
-              low ? "text-red-500" : "text-accent1"
+              low ? "animate-pulse text-red-400" : "text-gold"
             }`}
           >
             {mm}:{String(ss).padStart(2, "0")}
@@ -211,12 +229,12 @@ function ActiveCallBar() {
         </div>
 
         <div className="flex items-center gap-2">
-          {v.active.joinUrl && (
+          {v.active.joinUrl && !v.active.embeddable && (
             <a
               href={v.active.joinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-soft"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white hover:bg-white/10"
             >
               {t.video.openTeams}
             </a>
@@ -224,12 +242,46 @@ function ActiveCallBar() {
           <button
             type="button"
             onClick={() => v.endCall()}
-            className="rounded-full bg-red-500/90 px-5 py-2 text-sm font-semibold text-white hover:bg-red-500"
+            className="rounded-full bg-red-500 px-5 py-2 text-sm font-semibold text-white hover:bg-red-600"
           >
             {t.video.endCall}
           </button>
         </div>
+      </header>
+
+      {/* superficie de la llamada */}
+      <div className="relative min-h-0 flex-1">
+        {v.active.embeddable && v.active.joinUrl ? (
+          <iframe
+            title={t.video.title}
+            src={`${v.active.joinUrl}#config.prejoinPageEnabled=false`}
+            className="h-full w-full border-0"
+            allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+          />
+        ) : (
+          // Fallback para proveedores que no embeben (Teams).
+          <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-3xl">
+              🎥
+            </div>
+            <p className="max-w-sm text-white/70">{t.video.cannotEmbed}</p>
+            {v.active.joinUrl && (
+              <a
+                href={v.active.joinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-flame px-6 py-3"
+              >
+                {t.video.openTab}
+              </a>
+            )}
+          </div>
+        )}
       </div>
+
+      <footer className="shrink-0 bg-black/40 px-4 py-2 text-center text-[0.75rem] text-white/40">
+        {t.video.micCam} · {t.video.demoNote}
+      </footer>
     </div>
   );
 }

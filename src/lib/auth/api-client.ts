@@ -182,6 +182,8 @@ export interface Consultant {
 export interface StartSessionResult {
   sessionId: string;
   joinUrl: string | null;
+  /** true si la sala puede incrustarse en un iframe (Jitsi). */
+  embeddable: boolean;
   durationMin: number;
   totalCents: number;
   startedAt: string;
@@ -199,6 +201,7 @@ export interface SessionRecord {
   totalCents: number;
   status: "active" | "completed" | "cancelled";
   joinUrl: string | null;
+  embeddable: boolean;
   startedAt: string;
   expiresAt: string;
   endedAt: string | null;

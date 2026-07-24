@@ -22,6 +22,7 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
+    "ws": "^8.18.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/node": "^20.17.50",
     "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.2",
+    "@types/ws": "^8.5.13",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3",

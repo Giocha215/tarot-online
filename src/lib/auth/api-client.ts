@@ -165,3 +165,85 @@ export interface DashboardData {
 export function fetchDashboard(): Promise<DashboardData> {
   return apiFetch<DashboardData>("/api/services/dashboard", { auth: true });
 }
+
+// ------------------------------------------------------------------
+// Videollamada
+// ------------------------------------------------------------------
+
+export interface Consultant {
+  id: string;
+  slug: string;
+  name: string;
+  status: "online" | "busy" | "offline";
+  priceCentsPerMinute: number;
+  available: boolean;
+}
+
+export interface StartSessionResult {
+  sessionId: string;
+  joinUrl: string | null;
+  durationMin: number;
+  totalCents: number;
+  startedAt: string;
+  expiresAt: string;
+  balanceCents: number;
+  consultant: { slug: string; name: string };
+}
+
+export interface SessionRecord {
+  id: string;
+  consultantName: string;
+  consultantSlug: string;
+  channel: string;
+  durationMin: number;
+  totalCents: number;
+  status: "active" | "completed" | "cancelled";
+  joinUrl: string | null;
+  startedAt: string;
+  expiresAt: string;
+  endedAt: string | null;
+}
+
+export function fetchConsultants(): Promise<{ consultants: Consultant[] }> {
+  return apiFetch("/api/consultants");
+}
+
+export function startSession(input: {
+  consultantSlug: string;
+  durationMin: number;
+}): Promise<StartSessionResult> {
+  return apiFetch("/api/sessions/start", {
+    method: "POST",
+    auth: true,
+    body: input,
+  });
+}
+
+export function endSession(
+  sessionId: string,
+  reason: "completed" | "cancelled" = "completed",
+): Promise<{ ended: boolean; status: string }> {
+  return apiFetch(`/api/sessions/${sessionId}/end`, {
+    method: "POST",
+    auth: true,
+    body: { reason },
+  });
+}
+
+export function fetchActiveSession(): Promise<{ session: SessionRecord | null }> {
+  return apiFetch("/api/sessions/active", { auth: true });
+}
+
+export function fetchSessionHistory(): Promise<{ sessions: SessionRecord[] }> {
+  return apiFetch("/api/sessions", { auth: true });
+}
+
+export function topupWallet(
+  amountCents: number,
+): Promise<{ balanceCents: number; mode: string }> {
+  return apiFetch("/api/sessions/wallet/topup", {
+    method: "POST",
+    auth: true,
+    body: { amountCents },
+  });
+}

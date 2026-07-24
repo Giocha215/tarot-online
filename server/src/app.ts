@@ -6,7 +6,9 @@ import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { globalLimiter } from "./middleware/rate-limit.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { consultantsRouter } from "./modules/consultants/consultant.routes.js";
 import { servicesRouter } from "./modules/services/services.routes.js";
+import { sessionsRouter } from "./modules/sessions/session.routes.js";
 
 /**
  * Fábrica de la app (sin `listen`): así los tests montan la app en memoria
@@ -44,6 +46,8 @@ export function createApp(): Express {
 
   app.use("/api/auth", authRouter);
   app.use("/api/services", servicesRouter);
+  app.use("/api/consultants", consultantsRouter);
+  app.use("/api/sessions", sessionsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

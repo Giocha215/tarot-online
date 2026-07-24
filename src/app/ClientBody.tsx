@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { LanguageProvider } from "@/components/i18n/language-provider";
+import { VideoProvider } from "@/components/video/video-provider";
 
 export default function ClientBody({
   children,
@@ -18,7 +19,9 @@ export default function ClientBody({
   return (
     <LanguageProvider>
       <AuthProvider>
-        <div className="antialiased">{children}</div>
+        <VideoProvider>
+          <div className="antialiased">{children}</div>
+        </VideoProvider>
       </AuthProvider>
     </LanguageProvider>
   );

@@ -27,6 +27,19 @@ const envSchema = z.object({
   COOKIE_DOMAIN: z.string().optional(),
 
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
+
+  // --- Microsoft Teams ---
+  // Enlace de sala por defecto si una consultora no tiene el suyo. Con la
+  // integración de Graph API, este valor deja de usarse.
+  TEAMS_DEFAULT_JOIN_URL: z.string().default(""),
+
+  // --- Recarga de saldo (Stripe) ---
+  // Vacío = modo demo: la recarga acredita saldo sin cobro real.
+  STRIPE_SECRET_KEY: z.string().default(""),
+  STRIPE_WEBHOOK_SECRET: z.string().default(""),
+
+  // Máximo por recarga en modo demo, en céntimos (evita saldos absurdos).
+  DEMO_TOPUP_MAX_CENTS: z.coerce.number().int().positive().default(50_000),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -47,6 +60,8 @@ export const env = {
   corsOrigins: raw.CORS_ORIGIN.split(",")
     .map((o) => o.trim())
     .filter(Boolean),
+  // Sin clave de Stripe, la recarga funciona en modo demo (acredita sin cobrar).
+  stripeEnabled: raw.STRIPE_SECRET_KEY.length > 0,
 } as const;
 
 // En producción un secreto de ejemplo es una puerta abierta: mejor no arrancar.

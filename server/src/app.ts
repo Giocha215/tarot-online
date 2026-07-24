@@ -29,7 +29,11 @@ export function createApp(): Express {
         // Sin Origin = curl / apps móviles / same-origin: se permite.
         if (!origin) return callback(null, true);
         if (env.corsOrigins.includes(origin)) return callback(null, true);
-        callback(new Error(`Origen no permitido por CORS: ${origin}`));
+        // Origen no permitido: se rechaza SIN error. Lanzar un Error aquí
+        // hacía que el preflight respondiera 500 en vez de, simplemente, no
+        // devolver las cabeceras CORS (que es como el navegador espera el
+        // bloqueo). callback(null, false) hace justo eso.
+        callback(null, false);
       },
       credentials: true, // imprescindible para la cookie de refresh
     }),

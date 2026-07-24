@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { TAROT_IMAGES } from "./data";
 import { SunMark } from "./icons";
-import { TarotArt } from "./tarot-art";
 
 /**
  * Reverso y anverso de carta, compartidos por el hero y por el selector de
@@ -96,57 +97,27 @@ export function TarotFront({
   };
   compact?: boolean;
 }) {
+  const src = TAROT_IMAGES[card.index] ?? TAROT_IMAGES[0];
   return (
     <div
       className={cn(
-        "relative h-full w-full overflow-hidden rounded-xl shadow-card ring-1 ring-ink/15",
-        compact ? "p-[3px]" : "p-[5px]",
+        "relative h-full w-full overflow-hidden rounded-xl bg-[#f4ecd8] shadow-card ring-1 ring-ink/20",
+        compact ? "p-[2px]" : "p-[4px]",
       )}
-      style={{
-        // Papel crema con un veteado suave: da textura sin usar imágenes.
-        backgroundImage:
-          "radial-gradient(120% 80% at 30% 0%, hsl(var(--c-gold) / 0.22), transparent 60%), linear-gradient(155deg, #fbf6e9, #f3e9d2)",
-      }}
     >
-      <div className="flex h-full w-full flex-col rounded-lg border border-ink/25">
-        {/* numeral */}
-        <div className={cn("shrink-0 text-center", compact ? "pt-0.5" : "pt-1.5")}>
-          <span
-            className={cn(
-              "font-cinzel font-semibold tracking-[0.2em] text-ink/80",
-              compact ? "text-[0.34rem]" : "text-[0.6rem]",
-            )}
-          >
-            {card.numeral}
-          </span>
-        </div>
-
-        {/* escena */}
-        <div
-          className={cn(
-            "relative min-h-0 flex-1 overflow-hidden border-y border-ink/20",
-            compact ? "mx-0.5 my-0.5" : "mx-1.5 my-1",
-          )}
-        >
-          <TarotArt index={card.index} />
-        </div>
-
-        {/* cartela con el nombre */}
-        <div
-          className={cn(
-            "flex shrink-0 items-center justify-center",
-            compact ? "h-[14%] px-0.5" : "h-[13%] px-1.5",
-          )}
-        >
-          <span
-            className={cn(
-              "line-clamp-2 text-center font-cinzel font-semibold uppercase leading-none tracking-[0.1em] text-ink/85",
-              compact ? "text-[0.3rem]" : "text-[0.52rem]",
-            )}
-          >
-            {card.name}
-          </span>
-        </div>
+      <div className="relative h-full w-full overflow-hidden rounded-lg ring-1 ring-ink/15">
+        <Image
+          src={src as string}
+          alt={card.name}
+          fill
+          sizes="(max-width: 640px) 40vw, 160px"
+          className="object-cover"
+          // La baraja son 6 imágenes ligeras; no hace falta lazy-loading.
+          priority={!compact}
+          draggable={false}
+        />
+        {/* velo dorado sutil para integrar la carta en el tema */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/10 via-transparent to-gold/5" />
       </div>
     </div>
   );

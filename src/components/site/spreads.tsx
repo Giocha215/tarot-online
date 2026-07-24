@@ -113,7 +113,8 @@ function SpreadFlow({
         ),
       );
       setShuffling(false);
-    }, 900);
+      // Da tiempo a que la onda (0.035s × 32 cartas ≈ 1.1s) recorra el mazo.
+    }, 1500);
   }, []);
 
   const pick = useCallback(
@@ -232,14 +233,8 @@ function SpreadFlow({
             )}
 
             {/* mazo en abanico */}
-            <div className="mt-8 w-full overflow-x-auto overflow-y-visible pb-6 pt-4">
-              <div
-                className={cn(
-                  "mx-auto flex w-max px-4",
-                  // Mientras baraja, todo el mazo oscila como un bloque.
-                  shuffling && "origin-bottom animate-shuffle-deck",
-                )}
-              >
+            <div className="mt-8 w-full overflow-x-auto overflow-y-visible pb-8 pt-6">
+              <div className="mx-auto flex w-max px-4">
                 {Array.from({ length: DECK_SIZE }, (_, i) => i).map((pos) => {
                   const isPicked = picked.includes(pos);
                   const done = picked.length >= spread.cards;
@@ -253,16 +248,16 @@ function SpreadFlow({
                       style={
                         shuffling
                           ? {
-                              // Cada carta se contonea con su propio desfase:
-                              // el mazo deja de moverse "en bloque".
-                              animationDelay: `${(pos % 8) * 0.06}s`,
+                              // Desfase por posición real: la onda recorre el
+                              // mazo de izquierda a derecha, como un riffle.
+                              animationDelay: `${pos * 0.035}s`,
                             }
                           : undefined
                       }
                       className={cn(
                         "-ml-8 h-[150px] w-[100px] shrink-0 rounded-xl transition-all duration-300 first:ml-0",
                         "hover:z-10 focus-visible:z-10 focus-visible:outline-none",
-                        shuffling && "origin-bottom animate-card-sway",
+                        shuffling && "origin-bottom animate-card-riffle",
                         !shuffling &&
                           !done &&
                           !isPicked &&

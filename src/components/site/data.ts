@@ -58,7 +58,20 @@ export const ZODIAC: ZodiacSign[] = [
 export const TAROT_SYMBOLS = ["☀", "✦", "◍", "♀", "⊕", "∞"];
 
 /** Numeral del arcano mayor correspondiente, mismo orden que TAROT_SYMBOLS. */
-export const TAROT_NUMERALS = ["XIX", "XVII", "X", "III", "XXI", "XI"];
+export const TAROT_NUMERALS = ["XIX", "XVII", "X", "III", "XXI", "VIII"];
+
+/**
+ * Ilustración real de cada carta (baraja Rider-Waite-Smith, dominio público;
+ * ver public/images/tarot/CREDITS.md). Mismo orden que TAROT_SYMBOLS.
+ */
+export const TAROT_IMAGES = [
+  "/images/tarot/sun.jpg",
+  "/images/tarot/star.jpg",
+  "/images/tarot/wheel.jpg",
+  "/images/tarot/empress.jpg",
+  "/images/tarot/world.jpg",
+  "/images/tarot/strength.jpg",
+];
 
 // Index-matched by `slug` to translations[lang].spreads.items
 export interface Spread {

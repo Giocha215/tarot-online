@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tarot Online — Demo
 
-## Getting Started
+Plataforma de consultas de tarot: sitio web con tiradas interactivas,
+cuentas de usuario y videollamada con consultora. Versión de demostración.
 
-First, run the development server:
+> Basado visualmente en tarot-online.com.pt, con desarrollo propio del
+> backend, la autenticación y el flujo de videollamada.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Qué incluye
+
+- **Sitio (Next.js 15 + Tailwind)** — multi-idioma (PT / ES / EN), tema
+  verde, selector de tiradas con cartas reales (baraja Rider-Waite, dominio
+  público) y animación de barajado.
+- **Registro y login (JWT)** — access token en memoria + refresh en cookie
+  httpOnly con rotación y detección de reuso. Contraseñas con bcrypt.
+- **Videollamada (demo)** — botón en la tarjeta de consultora → login →
+  validación de saldo y disponibilidad → sala **embebida en la página**
+  (Jitsi Meet) con **temporizador** → cierre y facturación.
+- **Saldo e historial** — recarga en modo demo (sin pasarela real) e
+  historial de sesiones en el panel del usuario.
+- **Tiempo real** — WebSockets para el estado de las consultoras.
+
+## Arquitectura
+
+```
+/            Frontend Next.js (App Router)
+/server      Backend Express + PostgreSQL
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Capa     | Stack                                             |
+| -------- | ------------------------------------------------- |
+| Frontend | Next.js 15, React 18, Tailwind, TypeScript        |
+| Backend  | Express, PostgreSQL (pg), JWT, bcrypt, Zod, ws    |
+| Vídeo    | Jitsi Meet (demo) · Microsoft Teams (configurable)|
+| Deploy   | Netlify (front) · Railway (API + Postgres)        |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Puesta en marcha (local)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**1. Base de datos** (Docker):
 
-## Learn More
+```bash
+docker run -d --name tarot-pg -e POSTGRES_USER=tarot -e POSTGRES_PASSWORD=tarot_dev_pw -e POSTGRES_DB=tarot -p 5434:5432 postgres:16-alpine
+```
 
-To learn more about Next.js, take a look at the following resources:
+**2. Backend:**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd server
+npm install
+cp .env.example .env      # rellena JWT_SECRET y DATABASE_URL
+npm run migrate
+npm run dev               # http://localhost:4000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**3. Frontend** (en otra terminal, desde la raíz):
 
-## Deploy on Vercel
+```bash
+npm install
+echo NEXT_PUBLIC_API_URL=http://localhost:4000 > .env.local
+npm run dev               # http://localhost:3005
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Detalles del backend y del despliegue en [`server/README.md`](server/README.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pruebas
+
+```bash
+cd server && npm test     # 60 tests (unitarios + integración con Postgres)
+```
+
+## Estado
+
+Versión inicial (`v0.1.0`). En modo demo: la recarga de saldo no cobra de
+verdad y la videollamada usa Jitsi. Para producción quedan pendientes la
+pasarela de pago (Stripe) y, si se quiere Teams, la integración con
+Microsoft Graph.

@@ -18,7 +18,7 @@ function LoginForm() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isAuthenticated, status } = useAuth();
+  const { login, user, isAuthenticated, status } = useAuth();
   const { submitting, formError, fieldErrors, submit } = useAuthForm();
 
   const [email, setEmail] = useState("");
@@ -28,20 +28,30 @@ function LoginForm() {
   // `next` permite volver a la página que exigió sesión. Se exige que sea
   // una ruta interna: un `next=https://malo.com` sería un open redirect.
   const rawNext = searchParams.get("next");
-  const next = rawNext?.startsWith("/") && !rawNext.startsWith("//")
-    ? rawNext
-    : "/dashboard";
+  const validNext =
+    rawNext?.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+
+  // Destino según el rol: la asesora (consultant) va a su panel; el cliente,
+  // al dashboard. Un `next` explícito (venía de una página protegida) manda.
+  const destinationFor = (role: string) =>
+    validNext ??
+    (role === "consultant" || role === "admin" ? "/asesora" : "/dashboard");
 
   useEffect(() => {
-    if (status === "authenticated" && isAuthenticated) router.replace(next);
-  }, [status, isAuthenticated, router, next]);
+    if (status === "authenticated" && isAuthenticated && user) {
+      router.replace(destinationFor(user.role));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, isAuthenticated, user, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    let loggedRole = "client";
     const ok = await submit(async () => {
-      await login({ email, password });
+      const u = await login({ email, password });
+      loggedRole = u.role;
     });
-    if (ok) router.replace(next);
+    if (ok) router.replace(destinationFor(loggedRole));
   }
 
   return (

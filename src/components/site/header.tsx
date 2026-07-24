@@ -32,6 +32,12 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // La asesora (consultant) va a su panel; el cliente, a su dashboard.
+  const accountHref =
+    user?.role === "consultant" || user?.role === "admin"
+      ? "/asesora"
+      : "/dashboard";
+
   const NAV = [
     { label: t.nav.consultores, href: "#consultores" },
     { label: t.nav.servicos, href: "#servicos" },
@@ -77,7 +83,7 @@ export function Header() {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Link href="/dashboard" className="btn-flame px-5 py-2.5">
+              <Link href={accountHref} className="btn-flame px-5 py-2.5">
                 <UserIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">
                   {user?.displayName ?? t.header.minhaConta}
@@ -125,7 +131,7 @@ export function Header() {
             {isAuthenticated ? (
               <>
                 <Link
-                  href="/dashboard"
+                  href={accountHref}
                   onClick={() => setMobileOpen(false)}
                   className="rounded-lg px-2 py-3 text-[0.95rem] font-medium text-accent1"
                 >

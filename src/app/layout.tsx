@@ -28,8 +28,6 @@ export const metadata: Metadata = {
     "Consultas de tarot por chat, telefone ou email. Tarólogos certificados, resposta imediata e pagamento seguro por MB Way, Multibanco ou cartão.",
 };
 
-const themeInit = `(function(){try{var v=localStorage.getItem('tarot-theme-vars-arcano-carmesi');if(v){var o=JSON.parse(v);var r=document.documentElement;for(var k in o){r.style.setProperty(k,o[k]);}}}catch(e){}})();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,7 +40,6 @@ export default function RootLayout({
       className={`${cinzel.variable} ${cormorant.variable} ${inter.variable}`}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <Script
           crossOrigin="anonymous"
           src="//unpkg.com/react-grab/dist/index.global.js"

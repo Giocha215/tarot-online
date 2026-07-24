@@ -11,10 +11,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Mail,
   Phone,
   Star,
   Users,
+  Video,
 } from "./icons";
 
 function ChannelButton({
@@ -118,9 +118,9 @@ function ConsultantCard({ c, t }: { c: Consultant; t: Dict }) {
           tone="flame"
         />
         <ChannelButton
-          icon={<Mail className="h-3.5 w-3.5" />}
-          label={t.channels.email}
-          price="2,00€"
+          icon={<Video className="h-3.5 w-3.5" />}
+          label={t.channels.videochamada}
+          price="5,00€"
           tone="teal"
         />
       </div>

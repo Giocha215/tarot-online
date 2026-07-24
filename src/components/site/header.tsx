@@ -19,7 +19,7 @@ export function Logo({ className }: { className?: string }) {
           TAROT
         </span>
         <span className="font-cinzel text-[0.62rem] tracking-[0.42em] text-accent1">
-          ONLINE
+          DEMO
         </span>
       </span>
     </Link>
@@ -74,19 +74,6 @@ export function Header() {
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>
-
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-theme"))}
-            className="hidden items-center gap-2 rounded-full border border-line bg-surface/70 px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface sm:inline-flex"
-          >
-            <span className="flex gap-0.5">
-              <span className="h-3 w-3 rounded-full bg-accent1" />
-              <span className="h-3 w-3 rounded-full bg-gold" />
-              <span className="h-3 w-3 rounded-full bg-teal" />
-            </span>
-            {t.header.tema}
-          </button>
 
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
@@ -166,16 +153,6 @@ export function Header() {
             )}
             <div className="mt-2 flex items-center gap-2 px-2">
               <LanguageSwitcher />
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileOpen(false);
-                  window.dispatchEvent(new Event("open-theme"));
-                }}
-                className="rounded-full border border-line bg-surface/70 px-3.5 py-2 text-sm font-medium text-accent1"
-              >
-                {t.header.personalizarTema}
-              </button>
             </div>
           </nav>
         </div>

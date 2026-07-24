@@ -7,15 +7,9 @@ export interface Consultant {
   isNew?: boolean;
 }
 
+// Demo: una sola consultora disponible (la que controla la asesora en /asesora).
 export const CONSULTANTS: Consultant[] = [
   { name: "Carmen", slug: "carmen-oxeu", avatar: "/images/2733282868.jpeg", rating: 5.0, reviews: 88 },
-  { name: "Scarlet", slug: "scarlet-0bq4", avatar: "/images/4267627322.jpeg", rating: 5.0, reviews: 65 },
-  { name: "Samy", slug: "samy-zg6b", avatar: "/images/421824214.jpeg", rating: 4.9, reviews: 32 },
-  { name: "Cigana Inayá", slug: "cigana-inaya-vafq", avatar: "/images/3723115142.jpeg", rating: 5.0, reviews: 18 },
-  { name: "Charlotte", slug: "charlotte-bwns", avatar: "/images/4111375925.jpeg", rating: 4.9, reviews: 17 },
-  { name: "Ana Luz", slug: "ana-luz-xyzm", avatar: "/images/620940365.jpeg", rating: 5.0, reviews: 8 },
-  { name: "Marcos Cigano", slug: "marcos-cigano-ouwk", avatar: "/images/3899594855.jpeg", rating: 5.0, reviews: 4, isNew: true },
-  { name: "Duda Taróloga", slug: "duda-tarologa-b2xc", avatar: "/images/2525502776.jpeg", rating: 5.0, reviews: 32 },
 ];
 
 export interface AIConsultant {

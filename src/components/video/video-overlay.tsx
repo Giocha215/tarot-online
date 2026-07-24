@@ -73,7 +73,7 @@ export function VideoOverlay() {
         <p className="mt-4 text-[0.85rem] font-medium text-ink-soft">
           {t.video.chooseDuration}
         </p>
-        <div className="mt-2 grid grid-cols-4 gap-2">
+        <div className="mt-2 grid grid-cols-5 gap-1.5">
           {DURATIONS.map((d) => (
             <button
               key={d}
@@ -81,8 +81,8 @@ export function VideoOverlay() {
               onClick={() => setDuration(d)}
               className={
                 d === duration
-                  ? "rounded-xl border-2 border-accent1 bg-accent1/10 py-2.5 text-sm font-semibold text-accent1"
-                  : "rounded-xl border border-line py-2.5 text-sm text-ink-soft hover:border-accent1/50"
+                  ? "rounded-lg border-2 border-accent1 bg-accent1/10 py-2 text-[0.8rem] font-semibold text-accent1"
+                  : "rounded-lg border border-line py-2 text-[0.8rem] text-ink-soft hover:border-accent1/50"
               }
             >
               {d} {t.video.minutes}

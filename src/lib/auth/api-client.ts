@@ -250,3 +250,34 @@ export function topupWallet(
     body: { amountCents },
   });
 }
+
+// ------------------------------------------------------------------
+// Panel de la asesora
+// ------------------------------------------------------------------
+
+export interface AdvisorView {
+  consultant: { slug: string; name: string; status: string };
+  activeSession: {
+    id: string;
+    joinUrl: string | null;
+    embeddable: boolean;
+    durationMin: number;
+    startedAt: string;
+    expiresAt: string;
+  } | null;
+}
+
+export function fetchAdvisorView(): Promise<AdvisorView> {
+  return apiFetch("/api/consultants/me", { auth: true });
+}
+
+export function setConsultantStatus(
+  slug: string,
+  status: "online" | "busy" | "offline",
+): Promise<{ slug: string; status: string }> {
+  return apiFetch(`/api/consultants/${slug}/status`, {
+    method: "POST",
+    auth: true,
+    body: { status },
+  });
+}

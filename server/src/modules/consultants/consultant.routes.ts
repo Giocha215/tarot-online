@@ -17,6 +17,21 @@ consultantsRouter.get("/", async (_req, res, next) => {
   }
 });
 
+// Panel de la asesora: su consultora + la sesión activa del cliente (si la
+// hay), para unirse a la misma videollamada.
+consultantsRouter.get(
+  "/me",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json(await sessionService.getAdvisorView(req.user!.sub));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 // Panel de consultoras: cambiar el propio estado (online / busy / offline).
 consultantsRouter.post(
   "/:slug/status",

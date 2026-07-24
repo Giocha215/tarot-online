@@ -2,12 +2,14 @@ import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 import { runMigrations } from "./db/migrate.js";
 import { pool } from "./db/pool.js";
+import { seedDemoAdvisor } from "./db/seed.js";
 import { deleteExpired } from "./modules/auth/refresh-token.repository.js";
 import { sweepExpiredSessions } from "./modules/sessions/session.service.js";
 import { attachRealtime, closeRealtime } from "./realtime/hub.js";
 
 async function main() {
   await runMigrations();
+  await seedDemoAdvisor();
 
   const app = createApp();
   const server = app.listen(env.PORT, () => {

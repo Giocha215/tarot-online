@@ -224,6 +224,41 @@ export async function getActive(userId: string) {
     : null;
 }
 
+/**
+ * Panel de la asesora: la consultora que posee este usuario y su sesión
+ * activa (si la hay), con el enlace de la sala y la hora de expiración para
+ * unirse a la misma videollamada que el cliente y ver el mismo temporizador.
+ */
+export async function getAdvisorView(userId: string) {
+  const consultant = await consultantRepo.findByOwner(userId);
+  if (!consultant) {
+    throw forbidden(
+      "NOT_A_CONSULTANT",
+      "Esta cuenta no está asociada a ninguna consultora.",
+    );
+  }
+
+  const active = await sessionRepo.getActiveByConsultantId(consultant.id);
+  return {
+    consultant: {
+      slug: consultant.slug,
+      name: consultant.name,
+      status: consultant.status,
+    },
+    activeSession:
+      active && active.expires_at.getTime() > Date.now()
+        ? {
+            id: active.id,
+            joinUrl: active.join_url,
+            embeddable: isEmbeddable(active.join_url),
+            durationMin: active.duration_min,
+            startedAt: active.started_at.toISOString(),
+            expiresAt: active.expires_at.toISOString(),
+          }
+        : null,
+  };
+}
+
 /** Recarga de saldo. En modo demo acredita directamente. */
 export async function topup(userId: string, amountCents: number) {
   if (amountCents > env.DEMO_TOPUP_MAX_CENTS) {

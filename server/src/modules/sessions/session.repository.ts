@@ -145,6 +145,22 @@ export async function listByUser(
   return rows;
 }
 
+/** Sesión activa de una consultora (para el panel de la asesora). */
+export async function getActiveByConsultantId(
+  consultantId: string,
+): Promise<SessionWithConsultant | null> {
+  const { rows } = await query<SessionWithConsultant>(
+    `SELECT s.*, c.name AS consultant_name, c.slug AS consultant_slug
+       FROM sessions s
+       JOIN consultants c ON c.id = s.consultant_id
+      WHERE s.consultant_id = $1 AND s.status = 'active'
+      ORDER BY s.started_at DESC
+      LIMIT 1`,
+    [consultantId],
+  );
+  return rows[0] ?? null;
+}
+
 export async function getActiveForUser(
   userId: string,
 ): Promise<SessionWithConsultant | null> {

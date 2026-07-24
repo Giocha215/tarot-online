@@ -36,6 +36,13 @@ const envSchema = z.object({
   // Host de Jitsi. El público (meet.jit.si) sirve para demo.
   JITSI_HOST: z.string().default("meet.jit.si"),
 
+  // --- Usuario asesora de demostración ---
+  // Se crea al arrancar (idempotente) con rol 'consultant', dueño de la
+  // consultora indicada. Sirve para simular el lado de la asesora.
+  DEMO_ADVISOR_EMAIL: z.string().default("asesora@tarot.demo"),
+  DEMO_ADVISOR_PASSWORD: z.string().default("asesora-demo-2026"),
+  DEMO_ADVISOR_CONSULTANT_SLUG: z.string().default("carmen-oxeu"),
+
   // --- Microsoft Teams ---
   // Enlace de sala por defecto si una consultora no tiene el suyo. Con la
   // integración de Graph API, este valor deja de usarse.

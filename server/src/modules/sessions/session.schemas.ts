@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-/** Duraciones contratables de la videollamada, en minutos. */
-export const ALLOWED_DURATIONS = [15, 30, 45, 60] as const;
+/** Duraciones contratables de la videollamada, en minutos.
+ *  El 1 es solo para la demo (permite ver el flujo completo en un minuto). */
+export const ALLOWED_DURATIONS = [1, 15, 30, 45, 60] as const;
 
 export const startSessionSchema = z.object({
   consultantSlug: z.string().trim().min(1, "Falta la consultora."),

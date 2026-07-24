@@ -16,8 +16,9 @@ import type { StartSessionResult } from "@/lib/auth/api-client";
 import { ApiError } from "@/lib/auth/types";
 import { VideoOverlay } from "./video-overlay";
 
-/** Duraciones ofrecidas (deben coincidir con ALLOWED_DURATIONS del backend). */
-export const DURATIONS = [15, 30, 45, 60] as const;
+/** Duraciones ofrecidas (deben coincidir con ALLOWED_DURATIONS del backend).
+ *  El 1 es solo para la demo. */
+export const DURATIONS = [1, 15, 30, 45, 60] as const;
 
 /**
  * Fases del flujo:

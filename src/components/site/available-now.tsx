@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { useVideoCall } from "@/components/video/video-provider";
+import { fetchConsultants } from "@/lib/auth/api-client";
 import type { Dict } from "@/lib/i18n";
 import { CONSULTANTS, type Consultant } from "./data";
 import {
@@ -24,19 +25,25 @@ function ChannelButton({
   price,
   tone,
   onClick,
+  disabled,
 }: {
   icon: React.ReactNode;
   label: string;
   price: string;
   tone: "flame" | "teal";
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={cn(
-        "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2.5 text-ink-soft transition-all hover:brightness-105 active:scale-[0.98]",
+        "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2.5 text-ink-soft transition-all active:scale-[0.98]",
+        disabled
+          ? "cursor-not-allowed opacity-40 grayscale"
+          : "hover:brightness-105",
         tone === "flame"
           ? "shadow-[0_8px_18px_-10px_hsl(var(--c-accent)/0.8)]"
           : "shadow-[0_8px_18px_-10px_hsl(var(--c-teal)/0.8)]",
@@ -57,9 +64,34 @@ function ChannelButton({
   );
 }
 
-function ConsultantCard({ c, t }: { c: Consultant; t: Dict }) {
+function ConsultantCard({
+  c,
+  t,
+  status,
+}: {
+  c: Consultant;
+  t: Dict;
+  /** Estado real en vivo; undefined mientras carga. */
+  status?: "online" | "busy" | "offline";
+}) {
   const tr = t.consultants[c.slug];
   const video = useVideoCall();
+  const online = status === "online" || status === undefined;
+
+  // Color y etiqueta del indicador según el estado.
+  const dot =
+    status === "busy"
+      ? "bg-amber-500"
+      : status === "offline"
+        ? "bg-gray-400"
+        : "bg-teal";
+  const statusLabel =
+    status === "busy"
+      ? t.video.busy
+      : status === "offline"
+        ? t.video.offline
+        : t.video.online;
+
   return (
     <article className="flex w-[320px] shrink-0 snap-start flex-col rounded-2xl border border-line bg-surface p-4 shadow-soft transition-shadow hover:shadow-card">
       <div className="flex items-start gap-3">
@@ -70,15 +102,30 @@ function ConsultantCard({ c, t }: { c: Consultant; t: Dict }) {
             className="h-16 w-16 rounded-2xl object-cover ring-1 ring-line"
             loading="lazy"
           />
-          <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-surface bg-teal" />
+          <span
+            className={cn(
+              "absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-surface",
+              dot,
+            )}
+          />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-serif text-xl leading-tight text-ink">
               {c.name}
             </h3>
-            <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-teal/12 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-teal">
-              <Clock className="h-3 w-3" /> {t.available.semEspera}
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide",
+                status === "busy"
+                  ? "bg-amber-500/12 text-amber-600"
+                  : status === "offline"
+                    ? "bg-gray-400/15 text-gray-500"
+                    : "bg-teal/12 text-teal",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+              {statusLabel}
             </span>
           </div>
           {c.isNew && (
@@ -124,9 +171,10 @@ function ConsultantCard({ c, t }: { c: Consultant; t: Dict }) {
         />
         <ChannelButton
           icon={<Video className="h-3.5 w-3.5" />}
-          label={t.channels.videochamada}
-          price="5,00€/min"
+          label={online ? t.channels.videochamada : statusLabel}
+          price={online ? "5,00€/min" : "—"}
           tone="teal"
+          disabled={!online}
           onClick={() =>
             video.requestCall({
               slug: c.slug,
@@ -144,6 +192,29 @@ export function AvailableNow() {
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  // Estado real de cada consultora (slug -> estado), refrescado en vivo.
+  const [statuses, setStatuses] = useState<
+    Record<string, "online" | "busy" | "offline">
+  >({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      fetchConsultants()
+        .then(({ consultants }) => {
+          if (cancelled) return;
+          const map: Record<string, "online" | "busy" | "offline"> = {};
+          for (const c of consultants) map[c.slug] = c.status;
+          setStatuses(map);
+        })
+        .catch(() => {});
+    load();
+    const id = setInterval(load, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   const scrollBy = (dir: number) => {
     const el = scrollRef.current;
@@ -203,7 +274,7 @@ export function AvailableNow() {
         className="no-scrollbar mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
       >
         {CONSULTANTS.map((c) => (
-          <ConsultantCard key={c.slug} c={c} t={t} />
+          <ConsultantCard key={c.slug} c={c} t={t} status={statuses[c.slug]} />
         ))}
       </div>
 

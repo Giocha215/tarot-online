@@ -43,11 +43,21 @@ function AdvisorContent() {
   }, []);
 
   // Sondea cada 3 s para detectar cuándo el cliente inicia/termina la llamada.
+  // Además, al volver a la pestaña se refresca al instante: los navegadores
+  // congelan los timers en pestañas en segundo plano, así que sin esto el
+  // panel podría tardar en enterarse tras cambiar de ventana.
   useEffect(() => {
     load();
     pollRef.current = setInterval(load, 3000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", load);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", load);
     };
   }, [load]);
 

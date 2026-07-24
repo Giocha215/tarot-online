@@ -109,7 +109,7 @@ const pt = {
     titlePre: "Disponíveis",
     titleAccent: "agora",
     subtitle:
-      "Escolha quem atende e comece em 1 clique. Pague só os minutos que usa.",
+      "Está a um clique de se guiar para o seu futuro com clareza e confiança.",
     verTodos: "Ver todos",
     semEspera: "Sem espera",
     novo: "Novo",
@@ -432,7 +432,7 @@ const es: Dict = {
     titlePre: "Disponibles",
     titleAccent: "ahora",
     subtitle:
-      "Elige quién te atiende y empieza en 1 clic. Paga solo los minutos que usas.",
+      "Estás a un clic de guiarte hacia tu futuro con claridad y confianza.",
     verTodos: "Ver todos",
     semEspera: "Sin espera",
     novo: "Nuevo",
@@ -751,7 +751,7 @@ const en: Dict = {
     titlePre: "Available",
     titleAccent: "now",
     subtitle:
-      "Choose who answers and start in 1 click. Pay only for the minutes you use.",
+      "You're one click away from guiding your future with clarity and confidence.",
     verTodos: "See all",
     semEspera: "No wait",
     novo: "New",

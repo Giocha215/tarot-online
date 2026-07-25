@@ -198,8 +198,8 @@ const pt = {
         desc: "MB Way, Multibanco e cartão. SSL e dados protegidos.",
       },
       {
-        title: "Consultores avaliados",
-        desc: "Cada consulta é avaliada. Aprovamos só os melhores.",
+        title: "Consultora avaliada",
+        desc: "Consultora com mais de 20 anos de experiência.",
       },
       {
         title: "Sem assinaturas",
@@ -521,8 +521,8 @@ const es: Dict = {
         desc: "MB Way, Multibanco y tarjeta. SSL y datos protegidos.",
       },
       {
-        title: "Consultores valorados",
-        desc: "Cada consulta se valora. Aprobamos solo a los mejores.",
+        title: "Consultora valorada",
+        desc: "Consultora con más de 20 años de experiencia.",
       },
       {
         title: "Sin suscripciones",
@@ -840,8 +840,8 @@ const en: Dict = {
         desc: "MB Way, Multibanco and card. SSL and protected data.",
       },
       {
-        title: "Rated readers",
-        desc: "Every reading is rated. We approve only the best.",
+        title: "Rated reader",
+        desc: "Reader with over 20 years of experience.",
       },
       {
         title: "No subscriptions",

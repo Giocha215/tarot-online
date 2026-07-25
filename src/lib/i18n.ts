@@ -228,7 +228,7 @@ const pt = {
     workSub:
       "Junte-se à equipa APP Tarot Online. Submeta a sua candidatura em poucos minutos.",
     candidatar: "Candidatar-me",
-    appName: "APP TAROT ONLINE",
+    appName: "Tarot Demo",
     ageNote: "© 2026 · Consultas para maiores de 18 anos",
     procuraPor: "Procura por",
     searchChips: [
@@ -551,7 +551,7 @@ const es: Dict = {
     workSub:
       "Únete al equipo APP Tarot Online. Envía tu candidatura en pocos minutos.",
     candidatar: "Postularme",
-    appName: "APP TAROT ONLINE",
+    appName: "Tarot Demo",
     ageNote: "© 2026 · Consultas para mayores de 18 años",
     procuraPor: "Busca por",
     searchChips: [
@@ -870,7 +870,7 @@ const en: Dict = {
     workSub:
       "Join the APP Tarot Online team. Submit your application in just a few minutes.",
     candidatar: "Apply now",
-    appName: "APP TAROT ONLINE",
+    appName: "Tarot Demo",
     ageNote: "© 2026 · Readings for adults 18+",
     procuraPor: "Search for",
     searchChips: [

@@ -2,30 +2,14 @@
 
 import { useLanguage } from "@/components/i18n/language-provider";
 import { Logo } from "./header";
-import { Sparkles, WhatsApp } from "./icons";
+import { WhatsApp } from "./icons";
 
 export function Footer() {
   const { t } = useLanguage();
   return (
     <footer id="trabalhe" className="scroll-mt-24 pt-16">
-      {/* Work with us */}
-      <div className="container-tarot">
-        <div className="mx-auto flex max-w-2xl flex-col items-start gap-4 rounded-2xl border border-accent1/30 bg-gradient-to-r from-gold/20 to-surface p-5 shadow-soft sm:flex-row sm:items-center">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent1/15 text-accent1">
-            <Sparkles className="h-5 w-5" />
-          </span>
-          <div className="flex-1">
-            <h3 className="font-serif text-lg text-ink">{t.footer.workTitle}</h3>
-            <p className="text-sm text-ink-soft">{t.footer.workSub}</p>
-          </div>
-          <a href="#trabalhe" className="btn-flame shrink-0">
-            <Sparkles className="h-4 w-4" /> {t.footer.candidatar}
-          </a>
-        </div>
-      </div>
-
       {/* Footer body */}
-      <div className="mt-14 border-t border-line bg-soft/50">
+      <div className="border-t border-line bg-soft/50">
         <div className="container-tarot py-12 text-center">
           <div className="flex justify-center">
             <Logo />
@@ -67,17 +51,17 @@ export function Footer() {
           {/* contacts */}
           <div className="mt-6 flex flex-col items-center justify-center gap-2 text-sm text-ink-soft sm:flex-row sm:gap-6">
             <a
-              href="mailto:geral@tarot-online.com.pt"
+              href="mailto:asesora@tarotdemo.com"
               className="hover:text-accent1"
             >
-              geral@tarot-online.com.pt
+              asesora@tarotdemo.com
             </a>
             <a
-              href="https://wa.me/351911924148"
+              href="https://wa.me/00000000"
               className="inline-flex items-center gap-1.5 hover:text-teal"
             >
               <WhatsApp className="h-4 w-4 text-teal" />
-              WhatsApp +351 911 924 148
+              WhatsApp 00000000
             </a>
           </div>
 

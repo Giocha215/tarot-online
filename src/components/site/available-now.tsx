@@ -15,7 +15,6 @@ import {
   Clock,
   Phone,
   Star,
-  Users,
   Video,
 } from "./icons";
 
@@ -289,17 +288,6 @@ export function AvailableNow() {
             )}
           />
         ))}
-      </div>
-
-      {/* social proof */}
-      <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-line bg-surface/70 px-5 py-3.5 text-center shadow-soft backdrop-blur">
-        <p className="flex items-center justify-center gap-2 text-sm text-ink-soft">
-          <Users className="h-4 w-4 text-accent1" />
-          <span className="font-semibold text-ink">
-            {t.available.peopleCount}
-          </span>{" "}
-          {t.available.peopleRest}
-        </p>
       </div>
     </section>
   );

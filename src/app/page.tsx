@@ -1,4 +1,3 @@
-import { AIConsultants } from "@/components/site/ai-consultants";
 import { AvailableNow } from "@/components/site/available-now";
 import { Blog } from "@/components/site/blog";
 import { Footer } from "@/components/site/footer";
@@ -44,7 +43,6 @@ export default function Home() {
         <Spreads />
         <AvailableNow />
         <Hero />
-        <AIConsultants />
         <Trust />
         <Horoscope />
         <Blog />

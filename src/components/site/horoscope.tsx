@@ -117,7 +117,7 @@ export function Horoscope() {
               <Rating label={t.horoscope.sorte} value={sign.luck} />
             </div>
 
-            <a href="#virtuais" className="btn-flame mt-6 w-full">
+            <a href="#consultores" className="btn-flame mt-6 w-full">
               {t.horoscope.cta}
               <ArrowRight className="h-4 w-4" />
             </a>

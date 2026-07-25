@@ -132,7 +132,7 @@ export function Hero() {
               <div className="mt-5 w-full animate-fade-up text-center">
                 <p className="text-sm text-ink-soft">{card.text}</p>
                 <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
-                  <a href="#virtuais" className="btn-flame w-full sm:w-auto">
+                  <a href="#consultores" className="btn-flame w-full sm:w-auto">
                     <Sparkles className="h-4 w-4" /> {t.hero.fullReading}
                   </a>
                   <button

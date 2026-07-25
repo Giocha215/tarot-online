@@ -164,7 +164,7 @@ const pt = {
     titlePre: "Respostas claras para o seu futuro,",
     titleAccent: "hoje.",
     subtitle:
-      "Consultas imediatas por chat, telefone ou email com tarólogos certificados.",
+      "Consultas imediatas por chat, telefone ou email.",
     confidencial: "100% confidencial.",
     comoFunciona: "Como funciona",
     cardEyebrow: "Só hoje · 1 leitura grátis",
@@ -487,7 +487,7 @@ const es: Dict = {
     titlePre: "Respuestas claras para tu futuro,",
     titleAccent: "hoy.",
     subtitle:
-      "Consultas inmediatas por chat, teléfono o email con tarotistas certificados.",
+      "Consultas inmediatas por chat, teléfono o email.",
     confidencial: "100% confidencial.",
     comoFunciona: "Cómo funciona",
     cardEyebrow: "Solo hoy · 1 lectura gratis",
@@ -806,7 +806,7 @@ const en: Dict = {
     titlePre: "Clear answers for your future,",
     titleAccent: "today.",
     subtitle:
-      "Instant readings by chat, phone or email with certified tarot readers.",
+      "Instant readings by chat, phone or email.",
     confidencial: "100% confidential.",
     comoFunciona: "How it works",
     cardEyebrow: "Today only · 1 free reading",

@@ -196,6 +196,8 @@ export interface Consultant {
   status: "online" | "busy" | "offline";
   priceCentsPerMinute: number;
   available: boolean;
+  /** Si está ocupada, minutos contratados de la consulta en curso. */
+  activeDurationMin: number | null;
 }
 
 export interface StartSessionResult {

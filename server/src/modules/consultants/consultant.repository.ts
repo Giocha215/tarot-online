@@ -13,6 +13,11 @@ export interface ConsultantRow {
   owner_user_id: string | null;
 }
 
+/** Fila de consultora con la duración de su sesión activa (si la hay). */
+export interface ConsultantWithSession extends ConsultantRow {
+  active_duration_min: number | null;
+}
+
 export interface PublicConsultant {
   id: string;
   slug: string;
@@ -21,12 +26,16 @@ export interface PublicConsultant {
   priceCentsPerMinute: number;
   /** Disponible = online y sin sesión activa. */
   available: boolean;
+  /** Si está ocupada, minutos contratados de la consulta en curso. */
+  activeDurationMin: number | null;
 }
 
 const COLUMNS = `id, slug, name, status, price_cents_per_min,
                  teams_join_url, owner_user_id`;
 
-export function toPublicConsultant(row: ConsultantRow): PublicConsultant {
+export function toPublicConsultant(
+  row: ConsultantRow & { active_duration_min?: number | null },
+): PublicConsultant {
   return {
     id: row.id,
     slug: row.slug,
@@ -34,12 +43,20 @@ export function toPublicConsultant(row: ConsultantRow): PublicConsultant {
     status: row.status,
     priceCentsPerMinute: row.price_cents_per_min,
     available: row.status === "online",
+    activeDurationMin: row.active_duration_min ?? null,
   };
 }
 
-export async function listConsultants(): Promise<ConsultantRow[]> {
-  const { rows } = await query<ConsultantRow>(
-    `SELECT ${COLUMNS} FROM consultants ORDER BY name ASC`,
+export async function listConsultants(): Promise<ConsultantWithSession[]> {
+  // LEFT JOIN a la sesión activa (única por consultora) para saber la
+  // duración de la consulta en curso cuando está ocupada.
+  const { rows } = await query<ConsultantWithSession>(
+    `SELECT ${COLUMNS.split(",").map((c) => "c." + c.trim()).join(", ")},
+            s.duration_min AS active_duration_min
+       FROM consultants c
+       LEFT JOIN sessions s
+         ON s.consultant_id = c.id AND s.status = 'active'
+      ORDER BY c.name ASC`,
   );
   return rows;
 }

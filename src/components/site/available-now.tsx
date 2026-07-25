@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { useVideoCall } from "@/components/video/video-provider";
-import { fetchConsultants } from "@/lib/auth/api-client";
+import { fetchConsultants, topupWallet } from "@/lib/auth/api-client";
 import type { Dict } from "@/lib/i18n";
 import { CONSULTANTS, type Consultant } from "./data";
 import {
@@ -67,11 +68,14 @@ function ConsultantCard({
   c,
   t,
   status,
+  activeDurationMin,
 }: {
   c: Consultant;
   t: Dict;
   /** Estado real en vivo; undefined mientras carga. */
   status?: "online" | "busy" | "offline";
+  /** Minutos de la consulta en curso cuando está ocupada. */
+  activeDurationMin?: number | null;
 }) {
   const tr = t.consultants[c.slug];
   const video = useVideoCall();
@@ -139,9 +143,16 @@ function ConsultantCard({
       </div>
 
       <div className="mt-3 flex items-center gap-3 text-[0.78rem]">
-        <span className="inline-flex items-center gap-1 text-teal">
-          <Clock className="h-3.5 w-3.5" /> {t.available.respondeEm}
-        </span>
+        {status === "busy" && activeDurationMin ? (
+          <span className="inline-flex items-center gap-1 text-amber-600">
+            <Clock className="h-3.5 w-3.5" /> {t.available.busyIn} &gt;
+            {activeDurationMin} {t.video.minutes}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-teal">
+            <Clock className="h-3.5 w-3.5" /> {t.available.respondeEm}
+          </span>
+        )}
       </div>
 
       <div className="mt-2 flex items-center gap-1.5 text-[0.82rem]">
@@ -187,13 +198,80 @@ function ConsultantCard({
   );
 }
 
+/** Ficha de crédito: saldo del usuario, recargar y una frase inspiradora. */
+function CreditCard({ t }: { t: Dict }) {
+  const { isAuthenticated, user, reload } = useAuth();
+  const video = useVideoCall();
+  const [topping, setTopping] = useState(false);
+
+  const euros = (cents: number) =>
+    `${(cents / 100).toFixed(2).replace(".", ",")} €`;
+
+  const handleRecharge = async () => {
+    if (!isAuthenticated) {
+      // Reutiliza el gate de login del flujo de vídeo.
+      video.requestCall({
+        slug: "carmen-oxeu",
+        name: "",
+        priceCentsPerMinute: 500,
+      });
+      return;
+    }
+    setTopping(true);
+    try {
+      await topupWallet(2000); // +20 € demo
+      await reload();
+    } catch {
+      /* ignore */
+    } finally {
+      setTopping(false);
+    }
+  };
+
+  return (
+    <article className="flex w-[320px] shrink-0 snap-start flex-col rounded-2xl border border-line bg-surface p-5 shadow-soft">
+      {/* crédito + recargar */}
+      <div className="flex flex-col gap-2 rounded-xl bg-soft/60 p-4">
+        <div>
+          <p className="text-[0.78rem] text-ink-soft">
+            {isAuthenticated ? t.available.creditLabel : t.available.loginForCredit}
+          </p>
+          {isAuthenticated && (
+            <p className="font-cinzel text-[1.7rem] font-semibold text-accent1">
+              {euros(user?.balanceCents ?? 0)}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleRecharge}
+          disabled={topping}
+          className="btn-flame justify-center px-5 py-2.5 disabled:opacity-60"
+        >
+          {topping ? "…" : t.available.recharge}
+        </button>
+      </div>
+
+      {/* frase espiritual */}
+      <div className="mt-4 flex flex-1 items-center">
+        <p className="font-serif text-[0.98rem] italic leading-relaxed text-ink-soft">
+          “{t.available.spiritualPhrase}”
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export function AvailableNow() {
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  // Estado real de cada consultora (slug -> estado), refrescado en vivo.
+  // Estado real de cada consultora (slug -> estado + duración), en vivo.
   const [statuses, setStatuses] = useState<
-    Record<string, "online" | "busy" | "offline">
+    Record<
+      string,
+      { status: "online" | "busy" | "offline"; activeDurationMin: number | null }
+    >
   >({});
 
   useEffect(() => {
@@ -202,8 +280,18 @@ export function AvailableNow() {
       fetchConsultants()
         .then(({ consultants }) => {
           if (cancelled) return;
-          const map: Record<string, "online" | "busy" | "offline"> = {};
-          for (const c of consultants) map[c.slug] = c.status;
+          const map: Record<
+            string,
+            {
+              status: "online" | "busy" | "offline";
+              activeDurationMin: number | null;
+            }
+          > = {};
+          for (const c of consultants)
+            map[c.slug] = {
+              status: c.status,
+              activeDurationMin: c.activeDurationMin,
+            };
           setStatuses(map);
         })
         .catch(() => {});
@@ -273,8 +361,15 @@ export function AvailableNow() {
         className="no-scrollbar mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
       >
         {CONSULTANTS.map((c) => (
-          <ConsultantCard key={c.slug} c={c} t={t} status={statuses[c.slug]} />
+          <ConsultantCard
+            key={c.slug}
+            c={c}
+            t={t}
+            status={statuses[c.slug]?.status}
+            activeDurationMin={statuses[c.slug]?.activeDurationMin}
+          />
         ))}
+        <CreditCard t={t} />
       </div>
 
       {/* dots */}

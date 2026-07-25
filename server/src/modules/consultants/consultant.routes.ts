@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { authenticate, requireRole } from "../../middleware/authenticate.js";
 import { validateBody } from "../../middleware/validate.js";
-import { consultantStatusSchema } from "../sessions/session.schemas.js";
+import {
+  consultantStatusSchema,
+  updateRateSchema,
+} from "../sessions/session.schemas.js";
 import * as sessionService from "../sessions/session.service.js";
 import * as consultantRepo from "./consultant.repository.js";
 
@@ -26,6 +29,54 @@ consultantsRouter.get(
   async (req, res, next) => {
     try {
       res.json(await sessionService.getAdvisorView(req.user!.sub));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Historial de sesiones cobradas de la asesora.
+consultantsRouter.get(
+  "/me/sessions",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json(await sessionService.getAdvisorSessions(req.user!.sub));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Facturación por día y por mes.
+consultantsRouter.get(
+  "/me/stats",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json(await sessionService.getAdvisorStats(req.user!.sub));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Cambiar la tarifa (precio por minuto).
+consultantsRouter.patch(
+  "/me/rate",
+  authenticate,
+  requireRole("consultant", "admin"),
+  validateBody(updateRateSchema),
+  async (req, res, next) => {
+    try {
+      res.json(
+        await sessionService.updateAdvisorRate(
+          req.user!.sub,
+          req.body.priceCentsPerMin,
+        ),
+      );
     } catch (err) {
       next(err);
     }

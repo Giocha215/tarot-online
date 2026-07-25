@@ -145,6 +145,83 @@ export async function listByUser(
   return rows;
 }
 
+/** Sesiones de una consultora (para el panel de la asesora). */
+export async function listByConsultant(
+  consultantId: string,
+  limit = 100,
+): Promise<SessionWithConsultant[]> {
+  const { rows } = await query<SessionWithConsultant>(
+    `SELECT s.*, c.name AS consultant_name, c.slug AS consultant_slug
+       FROM sessions s
+       JOIN consultants c ON c.id = s.consultant_id
+      WHERE s.consultant_id = $1
+      ORDER BY s.started_at DESC
+      LIMIT $2`,
+    [consultantId, limit],
+  );
+  return rows;
+}
+
+/** Ingresos agregados por día (últimos 30 días) de una consultora. */
+export async function revenueByDay(
+  consultantId: string,
+): Promise<{ period: string; cents: number; count: number }[]> {
+  const { rows } = await query<{ period: string; cents: string; count: string }>(
+    `SELECT to_char(date_trunc('day', started_at), 'YYYY-MM-DD') AS period,
+            SUM(total_cents)::bigint AS cents,
+            COUNT(*)::bigint AS count
+       FROM sessions
+      WHERE consultant_id = $1
+        AND status IN ('completed', 'active')
+        AND started_at >= NOW() - INTERVAL '30 days'
+      GROUP BY 1 ORDER BY 1`,
+    [consultantId],
+  );
+  return rows.map((r) => ({
+    period: r.period,
+    cents: Number(r.cents),
+    count: Number(r.count),
+  }));
+}
+
+/** Ingresos agregados por mes (últimos 12 meses) de una consultora. */
+export async function revenueByMonth(
+  consultantId: string,
+): Promise<{ period: string; cents: number; count: number }[]> {
+  const { rows } = await query<{ period: string; cents: string; count: string }>(
+    `SELECT to_char(date_trunc('month', started_at), 'YYYY-MM') AS period,
+            SUM(total_cents)::bigint AS cents,
+            COUNT(*)::bigint AS count
+       FROM sessions
+      WHERE consultant_id = $1
+        AND status IN ('completed', 'active')
+        AND started_at >= NOW() - INTERVAL '12 months'
+      GROUP BY 1 ORDER BY 1`,
+    [consultantId],
+  );
+  return rows.map((r) => ({
+    period: r.period,
+    cents: Number(r.cents),
+    count: Number(r.count),
+  }));
+}
+
+/** Total histórico y nº de sesiones cobradas de una consultora. */
+export async function totalsByConsultant(
+  consultantId: string,
+): Promise<{ totalCents: number; count: number }> {
+  const { rows } = await query<{ cents: string | null; count: string }>(
+    `SELECT SUM(total_cents)::bigint AS cents, COUNT(*)::bigint AS count
+       FROM sessions
+      WHERE consultant_id = $1 AND status IN ('completed', 'active')`,
+    [consultantId],
+  );
+  return {
+    totalCents: Number(rows[0]?.cents ?? 0),
+    count: Number(rows[0]?.count ?? 0),
+  };
+}
+
 /** Sesión activa de una consultora (para el panel de la asesora). */
 export async function getActiveByConsultantId(
   consultantId: string,

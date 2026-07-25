@@ -103,6 +103,16 @@ export async function setStatus(
   else await query(q, [id, status]);
 }
 
+export async function updateRate(
+  id: string,
+  priceCentsPerMin: number,
+): Promise<void> {
+  await query("UPDATE consultants SET price_cents_per_min = $2 WHERE id = $1", [
+    id,
+    priceCentsPerMin,
+  ]);
+}
+
 export async function findByOwner(
   userId: string,
 ): Promise<ConsultantRow | null> {

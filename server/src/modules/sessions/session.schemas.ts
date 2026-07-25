@@ -26,6 +26,11 @@ export const consultantStatusSchema = z.object({
   status: z.enum(["online", "busy", "offline"]),
 });
 
+export const updateRateSchema = z.object({
+  // Precio por minuto en céntimos. Entre 0,10 € y 100 €/min.
+  priceCentsPerMin: z.number().int().min(10).max(10_000),
+});
+
 export type StartSessionInput = z.infer<typeof startSessionSchema>;
 export type TopupInput = z.infer<typeof topupSchema>;
 export type ConsultantStatusInput = z.infer<typeof consultantStatusSchema>;

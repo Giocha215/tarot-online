@@ -4,13 +4,26 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Protected } from "@/components/auth/protected";
 import { useLanguage } from "@/components/i18n/language-provider";
+import { BarChart } from "@/components/site/bar-chart";
 import { Logo } from "@/components/site/header";
 import {
+  fetchAdvisorSessions,
+  fetchAdvisorStats,
   fetchAdvisorView,
   setConsultantStatus,
+  updateAdvisorRate,
+  type AdvisorSessions,
+  type AdvisorStats,
   type AdvisorView,
 } from "@/lib/auth/api-client";
+import { LOCALE_MAP } from "@/lib/i18n";
 import { ApiError } from "@/lib/auth/types";
+
+const DURATIONS = [1, 15, 30, 45, 60] as const;
+
+function euros(cents: number): string {
+  return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
+}
 
 /** Cuenta atrás compartida con el cliente: deriva de expiresAt (reloj real). */
 function useCountdown(expiresAt: string | null): number {
@@ -185,11 +198,224 @@ function AdvisorContent() {
         </div>
 
         {/* esperando cliente */}
-        <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line py-14 text-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-accent1" />
-          <p className="text-ink-soft">{t.video.waitingClient}</p>
+        <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line py-10 text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent1" />
+          <p className="text-[0.9rem] text-ink-soft">{t.video.waitingClient}</p>
         </div>
+
+        {/* módulos: tarifas, facturación y sesiones */}
+        <AdvisorDashboard />
       </main>
+    </div>
+  );
+}
+
+/** Módulos del panel: tarifas, gráficas de facturación y sesiones cobradas. */
+function AdvisorDashboard() {
+  const { t, lang } = useLanguage();
+  const locale = LOCALE_MAP[lang];
+  const [sessions, setSessions] = useState<AdvisorSessions | null>(null);
+  const [stats, setStats] = useState<AdvisorStats | null>(null);
+  const [rateEuros, setRateEuros] = useState("");
+  const [savingRate, setSavingRate] = useState(false);
+  const [rateSaved, setRateSaved] = useState(false);
+
+  const load = useCallback(() => {
+    fetchAdvisorSessions()
+      .then((s) => {
+        setSessions(s);
+        setRateEuros((s.priceCentsPerMin / 100).toFixed(2));
+      })
+      .catch(() => {});
+    fetchAdvisorStats()
+      .then(setStats)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const saveRate = useCallback(async () => {
+    const cents = Math.round(Number(rateEuros.replace(",", ".")) * 100);
+    if (!Number.isFinite(cents) || cents < 10) return;
+    setSavingRate(true);
+    setRateSaved(false);
+    try {
+      await updateAdvisorRate(cents);
+      setRateSaved(true);
+      load();
+    } catch {
+      /* ignore */
+    } finally {
+      setSavingRate(false);
+    }
+  }, [rateEuros, load]);
+
+  const rateCents = Math.round(Number(rateEuros.replace(",", ".")) * 100) || 0;
+
+  return (
+    <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      {/* --- tarifas --- */}
+      <section className="rounded-2xl border border-line bg-surface/70 p-6 shadow-soft">
+        <h2 className="font-cinzel text-[1.1rem] font-semibold text-ink">
+          {t.video.dashRates}
+        </h2>
+        <div className="mt-4 flex items-end gap-2">
+          <div className="flex-1">
+            <label className="mb-1 block text-[0.8rem] text-ink-soft">
+              {t.video.ratePerMin}
+            </label>
+            <input
+              type="number"
+              step="0.10"
+              min="0.10"
+              value={rateEuros}
+              onChange={(e) => {
+                setRateEuros(e.target.value);
+                setRateSaved(false);
+              }}
+              className="h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={saveRate}
+            disabled={savingRate}
+            className="btn-flame h-11 px-5 disabled:opacity-60"
+          >
+            {savingRate ? "…" : t.video.saveRate}
+          </button>
+        </div>
+        {rateSaved && (
+          <p className="mt-2 text-[0.82rem] text-teal">{t.video.rateSaved}</p>
+        )}
+
+        {/* previsualización de coste por duración */}
+        <p className="mt-4 text-[0.8rem] text-ink-soft">{t.video.ratePreview}</p>
+        <div className="mt-2 grid grid-cols-5 gap-1.5">
+          {DURATIONS.map((d) => (
+            <div
+              key={d}
+              className="rounded-lg border border-line bg-soft/50 px-1 py-2 text-center"
+            >
+              <p className="text-[0.72rem] text-subtle">
+                {d} {t.video.minutes}
+              </p>
+              <p className="text-[0.82rem] font-semibold text-accent1">
+                {euros(rateCents * d)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* --- facturación total --- */}
+      <section className="rounded-2xl border border-line bg-surface/70 p-6 shadow-soft">
+        <h2 className="font-cinzel text-[1.1rem] font-semibold text-ink">
+          {t.video.dashBilling}
+        </h2>
+        <div className="mt-4 flex gap-6">
+          <div>
+            <p className="text-[0.78rem] uppercase tracking-wide text-subtle">
+              {t.video.totalBilled}
+            </p>
+            <p className="font-cinzel text-[1.8rem] font-semibold text-accent1">
+              {euros(stats?.totalCents ?? 0)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[0.78rem] uppercase tracking-wide text-subtle">
+              {t.video.sessionsCount}
+            </p>
+            <p className="font-cinzel text-[1.8rem] font-semibold text-ink">
+              {stats?.count ?? 0}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- gráfica diaria --- */}
+      <section className="rounded-2xl border border-line bg-surface/70 p-6 shadow-soft">
+        <h2 className="font-cinzel text-[1rem] font-semibold text-ink">
+          {t.video.daily}
+        </h2>
+        <div className="mt-3">
+          <BarChart data={stats?.daily ?? []} emptyLabel={t.video.noData} />
+        </div>
+      </section>
+
+      {/* --- gráfica mensual --- */}
+      <section className="rounded-2xl border border-line bg-surface/70 p-6 shadow-soft">
+        <h2 className="font-cinzel text-[1rem] font-semibold text-ink">
+          {t.video.monthly}
+        </h2>
+        <div className="mt-3">
+          <BarChart data={stats?.monthly ?? []} emptyLabel={t.video.noData} />
+        </div>
+      </section>
+
+      {/* --- sesiones cobradas --- */}
+      <section className="rounded-2xl border border-line bg-surface/70 p-6 shadow-soft lg:col-span-2">
+        <h2 className="font-cinzel text-[1.1rem] font-semibold text-ink">
+          {t.video.dashSessions}
+        </h2>
+        {sessions && sessions.sessions.length === 0 ? (
+          <p className="mt-3 text-[0.9rem] text-ink-soft">{t.video.noData}</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+            <table className="w-full min-w-[520px] text-left text-[0.86rem]">
+              <thead className="bg-soft/60 text-[0.72rem] uppercase tracking-wide text-subtle">
+                <tr>
+                  <th className="px-4 py-2.5 font-medium">{t.video.colDate}</th>
+                  <th className="px-4 py-2.5 font-medium">
+                    {t.video.colDuration}
+                  </th>
+                  <th className="px-4 py-2.5 font-medium">{t.video.colAmount}</th>
+                  <th className="px-4 py-2.5 font-medium">{t.video.colStatus}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessions?.sessions.map((s) => (
+                  <tr key={s.id} className="border-t border-line">
+                    <td className="px-4 py-2.5 text-ink-soft">
+                      {new Date(s.startedAt).toLocaleDateString(locale, {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="px-4 py-2.5 text-ink-soft">
+                      {s.durationMin} {t.video.minutes}
+                    </td>
+                    <td className="px-4 py-2.5 font-semibold text-ink">
+                      {euros(s.totalCents)}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={
+                          s.status === "active"
+                            ? "text-teal"
+                            : s.status === "completed"
+                              ? "text-ink-soft"
+                              : "text-red-400"
+                        }
+                      >
+                        {s.status === "active"
+                          ? t.video.online
+                          : s.status === "completed"
+                            ? "✓"
+                            : "✕"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

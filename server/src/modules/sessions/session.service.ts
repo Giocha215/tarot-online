@@ -308,6 +308,49 @@ export async function getAdvisorView(userId: string) {
   };
 }
 
+/** Resuelve la consultora del usuario asesora o lanza 403. */
+async function requireOwnedConsultant(userId: string) {
+  const consultant = await consultantRepo.findByOwner(userId);
+  if (!consultant) {
+    throw forbidden(
+      "NOT_A_CONSULTANT",
+      "Esta cuenta no está asociada a ninguna consultora.",
+    );
+  }
+  return consultant;
+}
+
+/** Historial de sesiones cobradas de la asesora, con total. */
+export async function getAdvisorSessions(userId: string) {
+  const consultant = await requireOwnedConsultant(userId);
+  const rows = await sessionRepo.listByConsultant(consultant.id);
+  const totals = await sessionRepo.totalsByConsultant(consultant.id);
+  return {
+    sessions: rows.map((r) => sessionRepo.toPublicSession(r)),
+    totalCents: totals.totalCents,
+    count: totals.count,
+    priceCentsPerMin: consultant.price_cents_per_min,
+  };
+}
+
+/** Facturación por día y por mes de la asesora, para las gráficas. */
+export async function getAdvisorStats(userId: string) {
+  const consultant = await requireOwnedConsultant(userId);
+  const [daily, monthly, totals] = await Promise.all([
+    sessionRepo.revenueByDay(consultant.id),
+    sessionRepo.revenueByMonth(consultant.id),
+    sessionRepo.totalsByConsultant(consultant.id),
+  ]);
+  return { daily, monthly, totalCents: totals.totalCents, count: totals.count };
+}
+
+/** La asesora cambia su tarifa (precio por minuto), en céntimos. */
+export async function updateAdvisorRate(userId: string, priceCentsPerMin: number) {
+  const consultant = await requireOwnedConsultant(userId);
+  await consultantRepo.updateRate(consultant.id, priceCentsPerMin);
+  return { priceCentsPerMin };
+}
+
 /** Recarga de saldo. En modo demo acredita directamente. */
 export async function topup(userId: string, amountCents: number) {
   if (amountCents > env.DEMO_TOPUP_MAX_CENTS) {

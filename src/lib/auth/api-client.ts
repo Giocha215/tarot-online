@@ -292,6 +292,44 @@ export function fetchAdvisorView(): Promise<AdvisorView> {
   return apiFetch("/api/consultants/me", { auth: true });
 }
 
+export interface AdvisorSessions {
+  sessions: SessionRecord[];
+  totalCents: number;
+  count: number;
+  priceCentsPerMin: number;
+}
+
+export function fetchAdvisorSessions(): Promise<AdvisorSessions> {
+  return apiFetch("/api/consultants/me/sessions", { auth: true });
+}
+
+export interface RevenuePoint {
+  period: string;
+  cents: number;
+  count: number;
+}
+
+export interface AdvisorStats {
+  daily: RevenuePoint[];
+  monthly: RevenuePoint[];
+  totalCents: number;
+  count: number;
+}
+
+export function fetchAdvisorStats(): Promise<AdvisorStats> {
+  return apiFetch("/api/consultants/me/stats", { auth: true });
+}
+
+export function updateAdvisorRate(
+  priceCentsPerMin: number,
+): Promise<{ priceCentsPerMin: number }> {
+  return apiFetch("/api/consultants/me/rate", {
+    method: "PATCH",
+    auth: true,
+    body: { priceCentsPerMin },
+  });
+}
+
 export function setConsultantStatus(
   slug: string,
   status: "online" | "busy" | "offline",

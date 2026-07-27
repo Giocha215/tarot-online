@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { authenticate } from "../../middleware/authenticate.js";
 import { validateBody } from "../../middleware/validate.js";
-import { startSessionSchema, topupSchema } from "./session.schemas.js";
+import {
+  rechargeHoursSchema,
+  startSessionSchema,
+  topupSchema,
+} from "./session.schemas.js";
 import * as sessionService from "./session.service.js";
 
 export const sessionsRouter = Router();
@@ -73,15 +77,16 @@ sessionsRouter.post(
   },
 );
 
-// Iniciar recarga: con Stripe devuelve la URL de Checkout; en demo acredita ya.
+// Iniciar recarga por horas: el cliente solo envía las horas; el importe lo
+// calcula el servidor con el precio que fija la asesora.
 sessionsRouter.post(
   "/wallet/checkout",
-  validateBody(topupSchema),
+  validateBody(rechargeHoursSchema),
   async (req, res, next) => {
     try {
-      const result = await sessionService.startTopup(
+      const result = await sessionService.startTopupByHours(
         req.user!.sub,
-        req.body.amountCents,
+        req.body.hours,
       );
       res.status(201).json(result);
     } catch (err) {

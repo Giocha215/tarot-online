@@ -10,8 +10,10 @@ import {
   fetchAdvisorSessions,
   fetchAdvisorStats,
   fetchAdvisorView,
+  fetchRechargePrice,
   setConsultantStatus,
   updateAdvisorRate,
+  updateRechargePrice,
   type AdvisorSessions,
   type AdvisorStats,
   type AdvisorView,
@@ -217,6 +219,7 @@ function AdvisorDashboard() {
   const [sessions, setSessions] = useState<AdvisorSessions | null>(null);
   const [stats, setStats] = useState<AdvisorStats | null>(null);
   const [rateEuros, setRateEuros] = useState("");
+  const [rechargeEuros, setRechargeEuros] = useState("");
   const [savingRate, setSavingRate] = useState(false);
   const [rateSaved, setRateSaved] = useState(false);
 
@@ -230,6 +233,11 @@ function AdvisorDashboard() {
     fetchAdvisorStats()
       .then(setStats)
       .catch(() => {});
+    fetchRechargePrice()
+      .then(({ pricePerHourCents }) =>
+        setRechargeEuros((pricePerHourCents / 100).toFixed(2)),
+      )
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -237,12 +245,19 @@ function AdvisorDashboard() {
   }, [load]);
 
   const saveRate = useCallback(async () => {
-    const cents = Math.round(Number(rateEuros.replace(",", ".")) * 100);
-    if (!Number.isFinite(cents) || cents < 10) return;
     setSavingRate(true);
     setRateSaved(false);
     try {
-      await updateAdvisorRate(cents);
+      const rateCents = Math.round(Number(rateEuros.replace(",", ".")) * 100);
+      if (Number.isFinite(rateCents) && rateCents >= 10) {
+        await updateAdvisorRate(rateCents);
+      }
+      const rechargeCents = Math.round(
+        Number(rechargeEuros.replace(",", ".")) * 100,
+      );
+      if (Number.isFinite(rechargeCents) && rechargeCents >= 100) {
+        await updateRechargePrice(rechargeCents);
+      }
       setRateSaved(true);
       load();
     } catch {
@@ -250,7 +265,7 @@ function AdvisorDashboard() {
     } finally {
       setSavingRate(false);
     }
-  }, [rateEuros, load]);
+  }, [rateEuros, rechargeEuros, load]);
 
   const rateCents = Math.round(Number(rateEuros.replace(",", ".")) * 100) || 0;
 
@@ -278,15 +293,34 @@ function AdvisorDashboard() {
               className="h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"
             />
           </div>
-          <button
-            type="button"
-            onClick={saveRate}
-            disabled={savingRate}
-            className="btn-flame h-11 px-5 disabled:opacity-60"
-          >
-            {savingRate ? "…" : t.video.saveRate}
-          </button>
         </div>
+
+        {/* precio por hora de la recarga (solo la asesora lo edita) */}
+        <div className="mt-3">
+          <label className="mb-1 block text-[0.8rem] text-ink-soft">
+            {t.video.rechargePriceLabel}
+          </label>
+          <input
+            type="number"
+            step="0.50"
+            min="1"
+            value={rechargeEuros}
+            onChange={(e) => {
+              setRechargeEuros(e.target.value);
+              setRateSaved(false);
+            }}
+            className="h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={saveRate}
+          disabled={savingRate}
+          className="btn-flame mt-3 h-11 w-full justify-center px-5 disabled:opacity-60"
+        >
+          {savingRate ? "…" : t.video.saveRate}
+        </button>
         {rateSaved && (
           <p className="mt-2 text-[0.82rem] text-teal">{t.video.rateSaved}</p>
         )}

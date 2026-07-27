@@ -352,6 +352,37 @@ export async function updateAdvisorRate(userId: string, priceCentsPerMin: number
 }
 
 /**
+ * Recarga por horas: el cliente solo elige las horas; el importe lo calcula
+ * el servidor con el precio por hora que fija la asesora. Así el cliente no
+ * puede manipular el precio ni el importe.
+ */
+export async function startTopupByHours(userId: string, hours: number) {
+  const { getRechargePriceCents } = await import(
+    "../settings/settings.repository.js"
+  );
+  const pricePerHour = await getRechargePriceCents();
+  return startTopup(userId, pricePerHour * hours);
+}
+
+/** Precio por hora de la recarga (público, para mostrarlo en el modal). */
+export async function getRechargePrice() {
+  const { getRechargePriceCents } = await import(
+    "../settings/settings.repository.js"
+  );
+  return { pricePerHourCents: await getRechargePriceCents() };
+}
+
+/** La asesora fija el precio por hora de la recarga. */
+export async function setRechargePrice(userId: string, pricePerHourCents: number) {
+  await requireOwnedConsultant(userId); // solo asesora/admin
+  const { setRechargePriceCents } = await import(
+    "../settings/settings.repository.js"
+  );
+  await setRechargePriceCents(pricePerHourCents);
+  return { pricePerHourCents };
+}
+
+/**
  * Inicia una recarga. Con Stripe configurado devuelve la URL de Checkout
  * (el saldo se acredita en el webhook al pagar). En modo demo acredita ya.
  */

@@ -273,11 +273,12 @@ export function topupWallet(
 }
 
 /**
- * Inicia una recarga. Con Stripe devuelve `{ mode:'stripe', url }` (hay que
- * redirigir a esa URL); en modo demo devuelve `{ mode:'demo', balanceCents }`.
+ * Inicia una recarga por horas. El servidor calcula el importe con el precio
+ * por hora que fija la asesora. Con Stripe devuelve `{ mode:'stripe', url }`;
+ * en modo demo `{ mode:'demo', balanceCents }`.
  */
 export function startTopup(
-  amountCents: number,
+  hours: number,
 ): Promise<
   | { mode: "stripe"; url: string }
   | { mode: "demo"; balanceCents: number }
@@ -285,7 +286,23 @@ export function startTopup(
   return apiFetch("/api/sessions/wallet/checkout", {
     method: "POST",
     auth: true,
-    body: { amountCents },
+    body: { hours },
+  });
+}
+
+/** Precio por hora de la recarga (público). */
+export function fetchRechargePrice(): Promise<{ pricePerHourCents: number }> {
+  return apiFetch("/api/services/recharge-price");
+}
+
+/** La asesora fija el precio por hora de la recarga. */
+export function updateRechargePrice(
+  pricePerHourCents: number,
+): Promise<{ pricePerHourCents: number }> {
+  return apiFetch("/api/consultants/me/recharge-price", {
+    method: "PATCH",
+    auth: true,
+    body: { pricePerHourCents },
   });
 }
 

@@ -2,8 +2,18 @@ import { Router } from "express";
 import { query } from "../../db/pool.js";
 import { authenticate, optionalAuth } from "../../middleware/authenticate.js";
 import * as userRepo from "../auth/user.repository.js";
+import { getRechargePriceCents } from "../settings/settings.repository.js";
 
 export const servicesRouter = Router();
+
+// Precio por hora de la recarga (público, para mostrarlo en el modal).
+servicesRouter.get("/recharge-price", async (_req, res, next) => {
+  try {
+    res.json({ pricePerHourCents: await getRechargePriceCents() });
+  } catch (err) {
+    next(err);
+  }
+});
 
 interface ServiceRow {
   id: string;

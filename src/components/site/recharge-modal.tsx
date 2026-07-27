@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/i18n/language-provider";
-import { startTopup } from "@/lib/auth/api-client";
+import { fetchRechargePrice, startTopup } from "@/lib/auth/api-client";
 
 const HOURS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const DEFAULT_PRICE_PER_HOUR = 20; // €/hora, editable
 
 /**
- * Modal de recarga por horas. Un precio por hora editable y opciones de 1 a
- * 10 horas; el importe = precio/hora × horas. Con Stripe redirige a la página
- * de pago; en modo demo acredita al momento.
+ * Modal de recarga por horas. El precio por hora lo fija la asesora (solo
+ * lectura aquí); el cliente solo elige cuántas horas. El importe lo calcula
+ * el servidor, así que el cliente no puede manipularlo.
  */
 export function RechargeModal({
   onClose,
@@ -20,20 +19,25 @@ export function RechargeModal({
   onDone: () => void;
 }) {
   const { t } = useLanguage();
-  const [pricePerHour, setPricePerHour] = useState(String(DEFAULT_PRICE_PER_HOUR));
+  const [pricePerHourCents, setPricePerHourCents] = useState<number | null>(null);
   const [hours, setHours] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const perHourCents = Math.round(Number(pricePerHour.replace(",", ".")) * 100) || 0;
-  const amountCents = perHourCents * hours;
+  useEffect(() => {
+    fetchRechargePrice()
+      .then(({ pricePerHourCents }) => setPricePerHourCents(pricePerHourCents))
+      .catch(() => setPricePerHourCents(2000));
+  }, []);
+
+  const perHour = pricePerHourCents ?? 0;
+  const amountCents = perHour * hours;
 
   async function pay() {
-    if (!Number.isFinite(amountCents) || amountCents < 100) return;
     setLoading(true);
     setMessage(null);
     try {
-      const res = await startTopup(amountCents);
+      const res = await startTopup(hours);
       if (res.mode === "stripe") {
         setMessage(t.available.rechargeRedirect);
         window.location.href = res.url;
@@ -58,18 +62,15 @@ export function RechargeModal({
           {t.available.rechargeTitle}
         </h3>
 
-        {/* precio por hora editable */}
-        <label className="mt-4 block text-[0.85rem] text-ink-soft">
-          {t.available.rechargePerHour}
-        </label>
-        <input
-          type="number"
-          min="1"
-          step="0.50"
-          value={pricePerHour}
-          onChange={(e) => setPricePerHour(e.target.value)}
-          className="mt-1 h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"
-        />
+        {/* precio por hora (solo lectura; lo fija la asesora) */}
+        <div className="mt-4 flex items-baseline justify-between rounded-xl bg-soft/60 px-4 py-3">
+          <span className="text-[0.85rem] text-ink-soft">
+            {t.available.rechargePerHour}
+          </span>
+          <span className="font-cinzel text-lg font-semibold text-accent1">
+            {pricePerHourCents === null ? "…" : euros(perHour)}
+          </span>
+        </div>
 
         {/* horas: 1 a 10 */}
         <p className="mt-4 text-[0.85rem] text-ink-soft">
@@ -97,7 +98,7 @@ export function RechargeModal({
                   {h}h
                 </span>
                 <span className="text-[0.62rem] text-subtle">
-                  {euros(perHourCents * h)}
+                  {euros(perHour * h)}
                 </span>
               </button>
             );
@@ -109,7 +110,7 @@ export function RechargeModal({
         <button
           type="button"
           onClick={pay}
-          disabled={loading || amountCents < 100}
+          disabled={loading || pricePerHourCents === null || amountCents < 100}
           className="btn-flame mt-5 w-full justify-center px-5 py-3 disabled:opacity-60"
         >
           {loading

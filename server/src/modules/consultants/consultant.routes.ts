@@ -3,6 +3,7 @@ import { authenticate, requireRole } from "../../middleware/authenticate.js";
 import { validateBody } from "../../middleware/validate.js";
 import {
   consultantStatusSchema,
+  rechargePriceSchema,
   updateRateSchema,
 } from "../sessions/session.schemas.js";
 import * as sessionService from "../sessions/session.service.js";
@@ -75,6 +76,26 @@ consultantsRouter.patch(
         await sessionService.updateAdvisorRate(
           req.user!.sub,
           req.body.priceCentsPerMin,
+        ),
+      );
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Fijar el precio por hora de las recargas (solo la asesora).
+consultantsRouter.patch(
+  "/me/recharge-price",
+  authenticate,
+  requireRole("consultant", "admin"),
+  validateBody(rechargePriceSchema),
+  async (req, res, next) => {
+    try {
+      res.json(
+        await sessionService.setRechargePrice(
+          req.user!.sub,
+          req.body.pricePerHourCents,
         ),
       );
     } catch (err) {

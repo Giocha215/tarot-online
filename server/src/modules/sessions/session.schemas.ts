@@ -31,6 +31,17 @@ export const updateRateSchema = z.object({
   priceCentsPerMin: z.number().int().min(10).max(10_000),
 });
 
+/** Recarga por horas: el cliente solo elige cuántas horas (1 a 10). */
+export const rechargeHoursSchema = z.object({
+  hours: z.number().int().min(1).max(10),
+});
+
+/** La asesora fija el precio por hora de la recarga (en céntimos). */
+export const rechargePriceSchema = z.object({
+  // Entre 1 € y 1000 €/hora.
+  pricePerHourCents: z.number().int().min(100).max(100_000),
+});
+
 export type StartSessionInput = z.infer<typeof startSessionSchema>;
 export type TopupInput = z.infer<typeof topupSchema>;
 export type ConsultantStatusInput = z.infer<typeof consultantStatusSchema>;

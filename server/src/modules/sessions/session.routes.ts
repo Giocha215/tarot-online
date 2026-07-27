@@ -72,3 +72,20 @@ sessionsRouter.post(
     }
   },
 );
+
+// Iniciar recarga: con Stripe devuelve la URL de Checkout; en demo acredita ya.
+sessionsRouter.post(
+  "/wallet/checkout",
+  validateBody(topupSchema),
+  async (req, res, next) => {
+    try {
+      const result = await sessionService.startTopup(
+        req.user!.sub,
+        req.body.amountCents,
+      );
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
+);

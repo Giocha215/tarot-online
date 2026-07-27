@@ -9,6 +9,7 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { consultantsRouter } from "./modules/consultants/consultant.routes.js";
 import { servicesRouter } from "./modules/services/services.routes.js";
 import { sessionsRouter } from "./modules/sessions/session.routes.js";
+import { stripeWebhookHandler } from "./modules/wallet/webhook.js";
 
 /**
  * Fábrica de la app (sin `listen`): así los tests montan la app en memoria
@@ -37,6 +38,14 @@ export function createApp(): Express {
       },
       credentials: true, // imprescindible para la cookie de refresh
     }),
+  );
+
+  // Webhook de Stripe: DEBE ir antes de express.json y recibir el cuerpo en
+  // crudo (Buffer) para poder verificar la firma. Por eso su propio raw parser.
+  app.post(
+    "/api/webhooks/stripe",
+    express.raw({ type: "application/json" }),
+    stripeWebhookHandler,
   );
 
   // Límite bajo a propósito: ningún endpoint de auth necesita más.

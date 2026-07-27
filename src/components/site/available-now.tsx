@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { useVideoCall } from "@/components/video/video-provider";
-import { fetchConsultants, topupWallet } from "@/lib/auth/api-client";
+import { fetchConsultants } from "@/lib/auth/api-client";
 import type { Dict } from "@/lib/i18n";
 import { CONSULTANTS, type Consultant } from "./data";
+import { RechargeModal } from "./recharge-modal";
 import {
   ArrowRight,
   Chat,
@@ -202,12 +203,12 @@ function ConsultantCard({
 function CreditCard({ t }: { t: Dict }) {
   const { isAuthenticated, user, reload } = useAuth();
   const video = useVideoCall();
-  const [topping, setTopping] = useState(false);
+  const [showRecharge, setShowRecharge] = useState(false);
 
   const euros = (cents: number) =>
     `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 
-  const handleRecharge = async () => {
+  const handleRecharge = () => {
     if (!isAuthenticated) {
       // Reutiliza el gate de login del flujo de vídeo.
       video.requestCall({
@@ -217,15 +218,7 @@ function CreditCard({ t }: { t: Dict }) {
       });
       return;
     }
-    setTopping(true);
-    try {
-      await topupWallet(2000); // +20 € demo
-      await reload();
-    } catch {
-      /* ignore */
-    } finally {
-      setTopping(false);
-    }
+    setShowRecharge(true);
   };
 
   return (
@@ -245,12 +238,18 @@ function CreditCard({ t }: { t: Dict }) {
         <button
           type="button"
           onClick={handleRecharge}
-          disabled={topping}
-          className="btn-flame justify-center px-5 py-2.5 disabled:opacity-60"
+          className="btn-flame justify-center px-5 py-2.5"
         >
-          {topping ? "…" : t.available.recharge}
+          {t.available.recharge}
         </button>
       </div>
+
+      {showRecharge && (
+        <RechargeModal
+          onClose={() => setShowRecharge(false)}
+          onDone={() => reload()}
+        />
+      )}
 
       {/* frase espiritual */}
       <div className="mt-4 flex flex-1 items-center">

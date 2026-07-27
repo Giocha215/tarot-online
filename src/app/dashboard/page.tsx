@@ -6,10 +6,12 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Protected } from "@/components/auth/protected";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { Logo } from "@/components/site/header";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { RechargeModal } from "@/components/site/recharge-modal";
 import {
   fetchDashboard,
   fetchSessionHistory,
-  topupWallet,
   type DashboardData,
   type SessionRecord,
 } from "@/lib/auth/api-client";
@@ -25,10 +27,11 @@ function formatCents(cents: number, locale: string): string {
 function DashboardContent() {
   const { t, lang } = useLanguage();
   const { user, logout, reload } = useAuth();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<DashboardData | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [toppingUp, setToppingUp] = useState(false);
+  const [showRecharge, setShowRecharge] = useState(false);
 
   const loadSessions = useCallback(() => {
     fetchSessionHistory()
@@ -51,17 +54,15 @@ function DashboardContent() {
     };
   }, [t, loadSessions]);
 
-  const handleTopup = useCallback(async () => {
-    setToppingUp(true);
-    try {
-      await topupWallet(2000); // +20,00 € en modo demo
-      await reload();
-    } catch {
-      setError(t.auth.errors.NETWORK);
-    } finally {
-      setToppingUp(false);
+  // Al volver de Stripe (?recarga=ok) el saldo puede tardar un instante en
+  // acreditarse vía webhook; se refresca el perfil un par de veces.
+  useEffect(() => {
+    if (searchParams.get("recarga") === "ok") {
+      reload();
+      const id = setTimeout(reload, 2500);
+      return () => clearTimeout(id);
     }
-  }, [reload, t]);
+  }, [searchParams, reload]);
 
   const locale = LOCALE_MAP[lang];
 
@@ -103,15 +104,26 @@ function DashboardContent() {
           <div className="flex flex-col items-end gap-1">
             <button
               type="button"
-              onClick={handleTopup}
-              disabled={toppingUp}
-              className="btn-flame px-5 py-2.5 disabled:opacity-60"
+              onClick={() => setShowRecharge(true)}
+              className="btn-flame px-5 py-2.5"
             >
-              {toppingUp ? t.auth.loading : `${t.video.topup} +20,00 €`}
+              {t.available.recharge}
             </button>
-            <span className="text-[0.72rem] text-subtle">{t.video.demoNote}</span>
           </div>
         </div>
+
+        {searchParams.get("recarga") === "ok" && (
+          <p className="mt-3 rounded-xl border border-teal/40 bg-teal/10 px-4 py-2.5 text-[0.88rem] text-ink">
+            {t.available.rechargeOk}
+          </p>
+        )}
+
+        {showRecharge && (
+          <RechargeModal
+            onClose={() => setShowRecharge(false)}
+            onDone={() => reload()}
+          />
+        )}
 
         <h2 className="mt-10 font-cinzel text-[1.2rem] font-semibold text-ink">
           {t.auth.servicesTitle}
@@ -223,7 +235,9 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <Protected>
-      <DashboardContent />
+      <Suspense fallback={null}>
+        <DashboardContent />
+      </Suspense>
     </Protected>
   );
 }

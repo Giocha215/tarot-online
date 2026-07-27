@@ -272,6 +272,23 @@ export function topupWallet(
   });
 }
 
+/**
+ * Inicia una recarga. Con Stripe devuelve `{ mode:'stripe', url }` (hay que
+ * redirigir a esa URL); en modo demo devuelve `{ mode:'demo', balanceCents }`.
+ */
+export function startTopup(
+  amountCents: number,
+): Promise<
+  | { mode: "stripe"; url: string }
+  | { mode: "demo"; balanceCents: number }
+> {
+  return apiFetch("/api/sessions/wallet/checkout", {
+    method: "POST",
+    auth: true,
+    body: { amountCents },
+  });
+}
+
 // ------------------------------------------------------------------
 // Panel de la asesora
 // ------------------------------------------------------------------

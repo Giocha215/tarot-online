@@ -351,6 +351,36 @@ export async function updateAdvisorRate(userId: string, priceCentsPerMin: number
   return { priceCentsPerMin };
 }
 
+/**
+ * Inicia una recarga. Con Stripe configurado devuelve la URL de Checkout
+ * (el saldo se acredita en el webhook al pagar). En modo demo acredita ya.
+ */
+export async function startTopup(userId: string, amountCents: number) {
+  if (amountCents > env.DEMO_TOPUP_MAX_CENTS && !env.stripeEnabled) {
+    throw badRequest(
+      "TOPUP_TOO_LARGE",
+      `El máximo por recarga en modo demo es ${env.DEMO_TOPUP_MAX_CENTS} céntimos.`,
+    );
+  }
+
+  if (env.stripeEnabled) {
+    const { createTopupCheckout } = await import("../wallet/stripe.service.js");
+    const url = await createTopupCheckout({ userId, amountCents });
+    return { mode: "stripe" as const, url };
+  }
+
+  // Demo: acreditar directamente.
+  const result = await withTransaction((client) =>
+    walletRepo.applyTransaction(client, {
+      userId,
+      amountCents,
+      kind: "topup",
+      reference: "demo",
+    }),
+  );
+  return { mode: "demo" as const, balanceCents: result?.balanceCents ?? 0 };
+}
+
 /** Recarga de saldo. En modo demo acredita directamente. */
 export async function topup(userId: string, amountCents: number) {
   if (amountCents > env.DEMO_TOPUP_MAX_CENTS) {

@@ -40,6 +40,18 @@ export async function applyTransaction(
   return { balanceCents: updated.balance_cents };
 }
 
+/** ¿Existe ya un movimiento con esta referencia? (idempotencia de webhooks). */
+export async function hasTransactionRef(
+  client: pg.PoolClient,
+  reference: string,
+): Promise<boolean> {
+  const { rows } = await client.query(
+    "SELECT 1 FROM wallet_transactions WHERE reference = $1 LIMIT 1",
+    [reference],
+  );
+  return rows.length > 0;
+}
+
 export interface WalletTxRow {
   id: string;
   amount_cents: number;

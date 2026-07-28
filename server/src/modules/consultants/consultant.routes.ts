@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { authenticate, requireRole } from "../../middleware/authenticate.js";
 import { validateBody } from "../../middleware/validate.js";
+import { setAvailabilitySchema } from "../appointments/appointment.schemas.js";
+import * as appointmentService from "../appointments/appointment.service.js";
 import {
   consultantStatusSchema,
   rechargePriceSchema,
@@ -10,6 +12,73 @@ import * as sessionService from "../sessions/session.service.js";
 import * as consultantRepo from "./consultant.repository.js";
 
 export const consultantsRouter = Router();
+
+// Disponibilidad semanal de la asesora (leer / reemplazar).
+consultantsRouter.get(
+  "/me/availability",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json(await appointmentService.getAvailability(req.user!.sub));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+consultantsRouter.put(
+  "/me/availability",
+  authenticate,
+  requireRole("consultant", "admin"),
+  validateBody(setAvailabilitySchema),
+  async (req, res, next) => {
+    try {
+      res.json(
+        await appointmentService.setAvailability(req.user!.sub, req.body.blocks),
+      );
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Agenda de la asesora: sus próximas citas.
+consultantsRouter.get(
+  "/me/appointments",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json({
+        appointments: await appointmentService.listForAdvisor(req.user!.sub),
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Huecos libres para agendar con una consultora (público).
+consultantsRouter.get("/:slug/slots", async (req, res, next) => {
+  try {
+    const durationMin = Number(req.query.durationMin);
+    if (!Number.isFinite(durationMin) || durationMin <= 0) {
+      res.status(400).json({
+        error: { code: "VALIDATION_ERROR", message: "durationMin inválido." },
+      });
+      return;
+    }
+    res.json(
+      await appointmentService.getAvailableSlots(
+        req.params.slug as string,
+        durationMin,
+      ),
+    );
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Catálogo público con el estado en vivo de cada consultora.
 consultantsRouter.get("/", async (_req, res, next) => {

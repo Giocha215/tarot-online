@@ -48,6 +48,8 @@ interface VideoContextValue {
   /** Punto de entrada desde el botón "Videollamada". */
   requestCall: (c: PendingConsultant) => void;
   confirmStart: (durationMin: number) => Promise<void>;
+  /** Entra directamente a una sesión ya creada (p. ej. desde una cita). */
+  enterSession: (result: StartSessionResult) => void;
   topup: (amountCents: number) => Promise<void>;
   endCall: () => Promise<void>;
   dismiss: () => void;
@@ -150,6 +152,15 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     [pending],
   );
 
+  const enterSession = useCallback((result: StartSessionResult) => {
+    setActive(result);
+    setBalanceCents(result.balanceCents);
+    setPhase("active");
+    if (result.channel === "video" && result.joinUrl) {
+      window.open(result.joinUrl, "_blank", "noopener,noreferrer");
+    }
+  }, []);
+
   const topup = useCallback(
     async (amountCents: number) => {
       try {
@@ -205,6 +216,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       errorCode,
       requestCall,
       confirmStart,
+      enterSession,
       topup,
       endCall,
       dismiss,
@@ -220,6 +232,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       errorCode,
       requestCall,
       confirmStart,
+      enterSession,
       topup,
       endCall,
       dismiss,

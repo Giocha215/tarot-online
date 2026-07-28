@@ -312,6 +312,119 @@ export function updateRechargePrice(
 }
 
 // ------------------------------------------------------------------
+// Agenda / citas
+// ------------------------------------------------------------------
+
+export interface SlotsResult {
+  slots: string[]; // instantes UTC (ISO)
+  priceCentsPerMin: number;
+}
+
+export function fetchSlots(
+  slug: string,
+  durationMin: number,
+): Promise<SlotsResult> {
+  return apiFetch(`/api/consultants/${slug}/slots?durationMin=${durationMin}`);
+}
+
+export interface Appointment {
+  id: string;
+  consultantSlug: string;
+  consultantName: string;
+  clientName: string;
+  channel: "video" | "chat";
+  durationMin: number;
+  totalCents: number;
+  startAt: string;
+  endAt: string;
+  status: "booked" | "cancelled" | "completed";
+  sessionId: string | null;
+}
+
+export function bookAppointment(input: {
+  consultantSlug: string;
+  channel: "video" | "chat";
+  durationMin: number;
+  startAt: string;
+}): Promise<{
+  id: string;
+  channel: "video" | "chat";
+  durationMin: number;
+  totalCents: number;
+  startAt: string;
+  endAt: string;
+  balanceCents: number;
+}> {
+  return apiFetch("/api/appointments", {
+    method: "POST",
+    auth: true,
+    body: input,
+  });
+}
+
+export function fetchMyAppointments(): Promise<{ appointments: Appointment[] }> {
+  return apiFetch("/api/appointments", { auth: true });
+}
+
+export function cancelAppointment(
+  id: string,
+): Promise<{ cancelled: boolean; refunded: boolean; balanceCents: number | null }> {
+  return apiFetch(`/api/appointments/${id}/cancel`, {
+    method: "POST",
+    auth: true,
+  });
+}
+
+/** Abre la sesión (chat/vídeo) de una cita ya pagada; misma forma que start. */
+export function startAppointment(id: string): Promise<{
+  sessionId: string;
+  channel: "video" | "chat";
+  joinUrl: string | null;
+  embeddable: boolean;
+  durationMin: number;
+  totalCents: number;
+  startedAt: string;
+  expiresAt: string;
+  consultant: { slug: string; name: string };
+}> {
+  return apiFetch(`/api/appointments/${id}/start`, {
+    method: "POST",
+    auth: true,
+  });
+}
+
+export interface AvailabilityBlock {
+  weekday: number; // 0=domingo … 6=sábado
+  startMinute: number;
+  endMinute: number;
+}
+
+export interface Availability {
+  timezone: string;
+  blocks: AvailabilityBlock[];
+}
+
+export function fetchAvailability(): Promise<Availability> {
+  return apiFetch("/api/consultants/me/availability", { auth: true });
+}
+
+export function setAvailability(
+  blocks: AvailabilityBlock[],
+): Promise<Availability> {
+  return apiFetch("/api/consultants/me/availability", {
+    method: "PUT",
+    auth: true,
+    body: { blocks },
+  });
+}
+
+export function fetchAdvisorAppointments(): Promise<{
+  appointments: Appointment[];
+}> {
+  return apiFetch("/api/consultants/me/appointments", { auth: true });
+}
+
+// ------------------------------------------------------------------
 // Panel de la asesora
 // ------------------------------------------------------------------
 

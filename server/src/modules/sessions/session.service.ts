@@ -206,6 +206,75 @@ export async function startSession(
 }
 
 /**
+ * Crea la sesión de una cita YA PAGADA (al reservar). No cobra de nuevo: el
+ * saldo se debitó al agendar. Registra igualmente total_cents en la sesión
+ * para que la facturación de la asesora lo contabilice. Marca a la consultora
+ * como ocupada y publica el cambio de estado.
+ */
+export async function startAppointmentSession(params: {
+  userId: string;
+  consultantId: string;
+  channel: "video" | "chat";
+  durationMin: number;
+  priceCentsPerMin: number;
+  totalCents: number;
+  expiresAt: Date;
+}) {
+  const result = await withTransaction(async (client) => {
+    const consultant = await consultantRepo.findById(params.consultantId);
+    if (!consultant) {
+      throw notFound(SESSION_ERRORS.CONSULTANT_NOT_FOUND, "Consultora no encontrada.");
+    }
+    const active = await sessionRepo.findActiveByConsultant(client, params.consultantId);
+    if (active) {
+      throw conflict(
+        SESSION_ERRORS.CONSULTANT_UNAVAILABLE,
+        "La consultora está en otra sesión.",
+      );
+    }
+    const joinUrl =
+      params.channel === "chat"
+        ? null
+        : await createRoom(params.durationMin, consultant.teams_join_url);
+
+    const session = await sessionRepo.insertSession(client, {
+      userId: params.userId,
+      consultantId: params.consultantId,
+      channel: params.channel,
+      durationMin: params.durationMin,
+      priceCentsPerMin: params.priceCentsPerMin,
+      totalCents: params.totalCents,
+      joinUrl,
+      expiresAt: params.expiresAt,
+    });
+    await consultantRepo.setStatus(params.consultantId, "busy", client);
+    return { session, consultant };
+  });
+
+  publish({
+    type: "consultant.status",
+    slug: result.consultant.slug,
+    status: "busy",
+    available: false,
+  });
+
+  return {
+    sessionId: result.session.id,
+    channel: result.session.channel,
+    joinUrl: result.session.join_url,
+    embeddable: isEmbeddable(result.session.join_url),
+    durationMin: result.session.duration_min,
+    totalCents: result.session.total_cents,
+    startedAt: result.session.started_at.toISOString(),
+    expiresAt: result.session.expires_at.toISOString(),
+    consultant: {
+      slug: result.consultant.slug,
+      name: result.consultant.name,
+    },
+  };
+}
+
+/**
  * Termina una sesión: por el temporizador (completed) o cancelada. Libera a
  * la consultora. Idempotente: si ya estaba cerrada, no hace nada.
  */

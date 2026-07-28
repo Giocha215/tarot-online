@@ -7,7 +7,9 @@ import { useLanguage } from "@/components/i18n/language-provider";
 import { useVideoCall } from "@/components/video/video-provider";
 import { fetchConsultants } from "@/lib/auth/api-client";
 import type { Dict } from "@/lib/i18n";
+import { BookingModal } from "./booking-modal";
 import { CONSULTANTS, type Consultant } from "./data";
+import { MyAppointments } from "./my-appointments";
 import { RechargeModal } from "./recharge-modal";
 import {
   ArrowRight,
@@ -70,6 +72,7 @@ function ConsultantCard({
   status,
   activeDurationMin,
   priceCentsPerMin,
+  onBooked,
 }: {
   c: Consultant;
   t: Dict;
@@ -79,9 +82,13 @@ function ConsultantCard({
   activeDurationMin?: number | null;
   /** Precio por minuto en vivo (lo fija la asesora); undefined mientras carga. */
   priceCentsPerMin?: number;
+  /** Se llama al reservar una cita, para refrescar "Mis citas". */
+  onBooked: () => void;
 }) {
   const tr = t.consultants[c.slug];
   const video = useVideoCall();
+  const { isAuthenticated } = useAuth();
+  const [showBooking, setShowBooking] = useState(false);
   const online = status === "online" || status === undefined;
 
   // Precio por minuto real (de la API). Mientras carga usamos 500 como
@@ -206,6 +213,33 @@ function ConsultantCard({
           }
         />
       </div>
+
+      {/* agendar cita (disponible aunque esté ocupada u offline) */}
+      <button
+        type="button"
+        onClick={() =>
+          isAuthenticated
+            ? setShowBooking(true)
+            : video.requestCall({
+                slug: c.slug,
+                name: c.name,
+                priceCentsPerMinute: perMinCents,
+                channel: "chat",
+              })
+        }
+        className="mt-2 w-full rounded-full border border-accent1/60 bg-accent1/5 px-4 py-2 text-[0.82rem] font-semibold text-accent1 hover:bg-accent1/10"
+      >
+        {t.booking.agendar}
+      </button>
+
+      {showBooking && (
+        <BookingModal
+          consultantSlug={c.slug}
+          consultantName={c.name}
+          onClose={() => setShowBooking(false)}
+          onBooked={onBooked}
+        />
+      )}
     </article>
   );
 }
@@ -277,6 +311,7 @@ export function AvailableNow() {
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const [apptRefresh, setApptRefresh] = useState(0);
   // Estado real de cada consultora (slug -> estado + duración), en vivo.
   const [statuses, setStatuses] = useState<
     Record<
@@ -373,9 +408,14 @@ export function AvailableNow() {
         </div>
       </div>
 
+      {/* próximas citas del cliente */}
+      <div className="mt-6">
+        <MyAppointments refreshKey={apptRefresh} />
+      </div>
+
       <div
         ref={scrollRef}
-        className="no-scrollbar mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
+        className="no-scrollbar mt-2 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
       >
         {CONSULTANTS.map((c) => (
           <ConsultantCard
@@ -385,6 +425,7 @@ export function AvailableNow() {
             status={statuses[c.slug]?.status}
             activeDurationMin={statuses[c.slug]?.activeDurationMin}
             priceCentsPerMin={statuses[c.slug]?.priceCentsPerMin}
+            onBooked={() => setApptRefresh((n) => n + 1)}
           />
         ))}
         <CreditCard t={t} />

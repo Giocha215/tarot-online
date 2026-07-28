@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { globalLimiter } from "./middleware/rate-limit.js";
+import { appointmentsRouter } from "./modules/appointments/appointment.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { consultantsRouter } from "./modules/consultants/consultant.routes.js";
 import { servicesRouter } from "./modules/services/services.routes.js";
@@ -61,6 +62,7 @@ export function createApp(): Express {
   app.use("/api/services", servicesRouter);
   app.use("/api/consultants", consultantsRouter);
   app.use("/api/sessions", sessionsRouter);
+  app.use("/api/appointments", appointmentsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { AdvisorAgenda, ScheduleEditor } from "@/components/advisor/scheduling";
 import { Protected } from "@/components/auth/protected";
 import { ChatRoom } from "@/components/chat/chat-room";
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -219,6 +220,10 @@ function AdvisorContent() {
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent1" />
           <p className="text-[0.9rem] text-ink-soft">{t.video.waitingClient}</p>
         </div>
+
+        {/* agenda y horario de trabajo */}
+        <AdvisorAgenda />
+        <ScheduleEditor />
 
         {/* módulos: tarifas, facturación y sesiones */}
         <AdvisorDashboard />

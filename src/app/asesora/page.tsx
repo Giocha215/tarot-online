@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Protected } from "@/components/auth/protected";
 import { useLanguage } from "@/components/i18n/language-provider";
-import { BarChart } from "@/components/site/bar-chart";
+import { BarChart3D } from "@/components/site/bar-chart-3d";
 import { Logo } from "@/components/site/header";
 import {
   fetchAdvisorSessions,
@@ -375,7 +375,11 @@ function AdvisorDashboard() {
           {t.video.daily}
         </h2>
         <div className="mt-3">
-          <BarChart data={stats?.daily ?? []} emptyLabel={t.video.noData} />
+          <BarChart3D
+            data={stats?.daily ?? []}
+            emptyLabel={t.video.noData}
+            locale={locale}
+          />
         </div>
       </section>
 
@@ -385,7 +389,11 @@ function AdvisorDashboard() {
           {t.video.monthly}
         </h2>
         <div className="mt-3">
-          <BarChart data={stats?.monthly ?? []} emptyLabel={t.video.noData} />
+          <BarChart3D
+            data={stats?.monthly ?? []}
+            emptyLabel={t.video.noData}
+            locale={locale}
+          />
         </div>
       </section>
 

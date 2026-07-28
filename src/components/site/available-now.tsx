@@ -15,7 +15,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Phone,
   Star,
   Video,
 } from "./icons";
@@ -179,12 +178,6 @@ function ConsultantCard({
         <ChannelButton
           icon={<Chat className="h-3.5 w-3.5" />}
           label={t.channels.chat}
-          price={pricePerMinLabel}
-          tone="flame"
-        />
-        <ChannelButton
-          icon={<Phone className="h-3.5 w-3.5" />}
-          label={t.channels.telefone}
           price={pricePerMinLabel}
           tone="flame"
         />

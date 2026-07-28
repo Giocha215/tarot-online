@@ -70,6 +70,7 @@ function ConsultantCard({
   t,
   status,
   activeDurationMin,
+  priceCentsPerMin,
 }: {
   c: Consultant;
   t: Dict;
@@ -77,10 +78,17 @@ function ConsultantCard({
   status?: "online" | "busy" | "offline";
   /** Minutos de la consulta en curso cuando está ocupada. */
   activeDurationMin?: number | null;
+  /** Precio por minuto en vivo (lo fija la asesora); undefined mientras carga. */
+  priceCentsPerMin?: number;
 }) {
   const tr = t.consultants[c.slug];
   const video = useVideoCall();
   const online = status === "online" || status === undefined;
+
+  // Precio por minuto real (de la API). Mientras carga usamos 500 como
+  // referencia, pero el importe que se cobra lo recalcula el servidor.
+  const perMinCents = priceCentsPerMin ?? 500;
+  const videoPrice = `${(perMinCents / 100).toFixed(2).replace(".", ",")}€/min`;
 
   // Color y etiqueta del indicador según el estado.
   const dot =
@@ -183,14 +191,14 @@ function ConsultantCard({
         <ChannelButton
           icon={<Video className="h-3.5 w-3.5" />}
           label={online ? t.channels.videochamada : statusLabel}
-          price={online ? "5,00€/min" : "—"}
+          price={online ? videoPrice : "—"}
           tone="teal"
           disabled={!online}
           onClick={() =>
             video.requestCall({
               slug: c.slug,
               name: c.name,
-              priceCentsPerMinute: 500,
+              priceCentsPerMinute: perMinCents,
             })
           }
         />
@@ -269,7 +277,11 @@ export function AvailableNow() {
   const [statuses, setStatuses] = useState<
     Record<
       string,
-      { status: "online" | "busy" | "offline"; activeDurationMin: number | null }
+      {
+        status: "online" | "busy" | "offline";
+        activeDurationMin: number | null;
+        priceCentsPerMin: number;
+      }
     >
   >({});
 
@@ -284,12 +296,14 @@ export function AvailableNow() {
             {
               status: "online" | "busy" | "offline";
               activeDurationMin: number | null;
+              priceCentsPerMin: number;
             }
           > = {};
           for (const c of consultants)
             map[c.slug] = {
               status: c.status,
               activeDurationMin: c.activeDurationMin,
+              priceCentsPerMin: c.priceCentsPerMinute,
             };
           setStatuses(map);
         })
@@ -366,6 +380,7 @@ export function AvailableNow() {
             t={t}
             status={statuses[c.slug]?.status}
             activeDurationMin={statuses[c.slug]?.activeDurationMin}
+            priceCentsPerMin={statuses[c.slug]?.priceCentsPerMin}
           />
         ))}
         <CreditCard t={t} />

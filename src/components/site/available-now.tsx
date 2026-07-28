@@ -88,7 +88,7 @@ function ConsultantCard({
   // Precio por minuto real (de la API). Mientras carga usamos 500 como
   // referencia, pero el importe que se cobra lo recalcula el servidor.
   const perMinCents = priceCentsPerMin ?? 500;
-  const videoPrice = `${(perMinCents / 100).toFixed(2).replace(".", ",")}€/min`;
+  const pricePerMinLabel = `${(perMinCents / 100).toFixed(2).replace(".", ",")}€/min`;
 
   // Color y etiqueta del indicador según el estado.
   const dot =
@@ -179,19 +179,19 @@ function ConsultantCard({
         <ChannelButton
           icon={<Chat className="h-3.5 w-3.5" />}
           label={t.channels.chat}
-          price="1,00€/min"
+          price={pricePerMinLabel}
           tone="flame"
         />
         <ChannelButton
           icon={<Phone className="h-3.5 w-3.5" />}
           label={t.channels.telefone}
-          price="1,20€/min"
+          price={pricePerMinLabel}
           tone="flame"
         />
         <ChannelButton
           icon={<Video className="h-3.5 w-3.5" />}
           label={online ? t.channels.videochamada : statusLabel}
-          price={online ? videoPrice : "—"}
+          price={online ? pricePerMinLabel : "—"}
           tone="teal"
           disabled={!online}
           onClick={() =>

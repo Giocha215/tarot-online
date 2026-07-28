@@ -177,9 +177,18 @@ function ConsultantCard({
       <div className="mt-3 flex gap-2">
         <ChannelButton
           icon={<Chat className="h-3.5 w-3.5" />}
-          label={t.channels.chat}
-          price={pricePerMinLabel}
+          label={online ? t.channels.chat : statusLabel}
+          price={online ? pricePerMinLabel : "—"}
           tone="flame"
+          disabled={!online}
+          onClick={() =>
+            video.requestCall({
+              slug: c.slug,
+              name: c.name,
+              priceCentsPerMinute: perMinCents,
+              channel: "chat",
+            })
+          }
         />
         <ChannelButton
           icon={<Video className="h-3.5 w-3.5" />}
@@ -192,6 +201,7 @@ function ConsultantCard({
               slug: c.slug,
               name: c.name,
               priceCentsPerMinute: perMinCents,
+              channel: "video",
             })
           }
         />
@@ -216,6 +226,7 @@ function CreditCard({ t }: { t: Dict }) {
         slug: "carmen-oxeu",
         name: "",
         priceCentsPerMinute: 500,
+        channel: "video",
       });
       return;
     }

@@ -34,6 +34,8 @@ interface PendingConsultant {
   slug: string;
   name: string;
   priceCentsPerMinute: number;
+  /** Canal de la consulta: videollamada o chat en vivo. */
+  channel: "video" | "chat";
 }
 
 interface VideoContextValue {
@@ -83,6 +85,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         if (new Date(session.expiresAt).getTime() <= Date.now()) return;
         setActive({
           sessionId: session.id,
+          channel: session.channel === "chat" ? "chat" : "video",
           joinUrl: session.joinUrl,
           embeddable: session.embeddable,
           durationMin: session.durationMin,
@@ -122,12 +125,14 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         const result = await api.startSession({
           consultantSlug: pending.slug,
           durationMin,
+          channel: pending.channel,
         });
         setActive(result);
         setBalanceCents(result.balanceCents);
         setPhase("active");
-        // Punto 3: abrir la sala de Teams en una pestaña nueva.
-        if (result.joinUrl) {
+        // Vídeo con sala externa (Teams): abrir en pestaña nueva. El chat no
+        // tiene joinUrl, así que este bloque no aplica.
+        if (result.channel === "video" && result.joinUrl) {
           window.open(result.joinUrl, "_blank", "noopener,noreferrer");
         }
       } catch (err) {

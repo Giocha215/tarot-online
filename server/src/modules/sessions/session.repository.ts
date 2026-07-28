@@ -64,6 +64,7 @@ export async function insertSession(
   params: {
     userId: string;
     consultantId: string;
+    channel: string;
     durationMin: number;
     priceCentsPerMin: number;
     totalCents: number;
@@ -73,13 +74,14 @@ export async function insertSession(
 ): Promise<SessionRow> {
   const { rows } = await client.query<SessionRow>(
     `INSERT INTO sessions
-       (user_id, consultant_id, duration_min, price_cents_per_min,
+       (user_id, consultant_id, channel, duration_min, price_cents_per_min,
         total_cents, join_url, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING *`,
     [
       params.userId,
       params.consultantId,
+      params.channel,
       params.durationMin,
       params.priceCentsPerMin,
       params.totalCents,

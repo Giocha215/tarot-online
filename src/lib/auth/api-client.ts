@@ -3,6 +3,9 @@ import { ApiError, type ApiErrorBody, type AuthResponse, type User } from "./typ
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:4000";
 
+/** URL del WebSocket de tiempo real (chat). http(s) -> ws(s). */
+export const WS_URL = `${API_URL.replace(/^http/, "ws")}/ws`;
+
 /**
  * El access token vive SOLO en memoria de módulo: ni localStorage ni cookie
  * legible. Un XSS no puede leerlo con `localStorage.getItem`, y al recargar la
@@ -202,6 +205,7 @@ export interface Consultant {
 
 export interface StartSessionResult {
   sessionId: string;
+  channel: "video" | "chat";
   joinUrl: string | null;
   /** true si la sala puede incrustarse en un iframe (Jitsi). */
   embeddable: boolean;
@@ -235,6 +239,7 @@ export function fetchConsultants(): Promise<{ consultants: Consultant[] }> {
 export function startSession(input: {
   consultantSlug: string;
   durationMin: number;
+  channel?: "video" | "chat";
 }): Promise<StartSessionResult> {
   return apiFetch("/api/sessions/start", {
     method: "POST",
@@ -314,6 +319,7 @@ export interface AdvisorView {
   consultant: { slug: string; name: string; status: string };
   activeSession: {
     id: string;
+    channel: "video" | "chat";
     joinUrl: string | null;
     embeddable: boolean;
     durationMin: number;

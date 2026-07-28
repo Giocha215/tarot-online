@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChatRoom } from "@/components/chat/chat-room";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { DURATIONS, useCountdown, useVideoCall } from "./video-provider";
 
@@ -56,6 +57,7 @@ export function VideoOverlay() {
 
   // -------------------------------------------------------------- choose
   if (v.phase === "choose" && v.pending) {
+    const isChat = v.pending.channel === "chat";
     const rate = v.pending.priceCentsPerMinute;
     const cost = rate * duration;
     const affordable = v.balanceCents >= cost;
@@ -64,7 +66,7 @@ export function VideoOverlay() {
     return (
       <Backdrop>
         <p className="text-[0.8rem] uppercase tracking-wider text-accent1">
-          {t.video.title}
+          {isChat ? t.chat.title : t.video.title}
         </p>
         <h3 className="mt-1 font-cinzel text-xl font-semibold text-ink">
           {v.pending.name}
@@ -136,7 +138,13 @@ export function VideoOverlay() {
             disabled={v.starting}
             className="btn-flame mt-5 w-full justify-center px-5 py-3 disabled:opacity-60"
           >
-            {v.starting ? t.video.starting : t.video.start}
+            {v.starting
+              ? isChat
+                ? t.chat.starting
+                : t.video.starting
+              : isChat
+                ? t.chat.start
+                : t.video.start}
           </button>
         )}
 
@@ -153,6 +161,7 @@ export function VideoOverlay() {
 
   // -------------------------------------------------------------- active
   if (v.phase === "active" && v.active) {
+    if (v.active.channel === "chat") return <ClientChatRoom />;
     return <CallRoom />;
   }
 
@@ -181,6 +190,22 @@ export function VideoOverlay() {
   }
 
   return null;
+}
+
+/** Chat del cliente: usa la sala de chat compartida con el rol "client". */
+function ClientChatRoom() {
+  const v = useVideoCall();
+  if (!v.active) return null;
+  return (
+    <ChatRoom
+      sessionId={v.active.sessionId}
+      expiresAt={v.active.expiresAt}
+      peerName={v.active.consultant.name}
+      myRole="client"
+      onExpire={v.endCall}
+      onEnd={v.endCall}
+    />
+  );
 }
 
 /**

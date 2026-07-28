@@ -106,8 +106,9 @@ export const SESSION_ERRORS = {
  */
 export async function startSession(
   userId: string,
-  input: { consultantSlug: string; durationMin: number },
+  input: { consultantSlug: string; durationMin: number; channel?: "video" | "chat" },
 ) {
+  const channel = input.channel ?? "video";
   const result = await withTransaction(async (client) => {
     const consultant = await consultantRepo.findBySlugForUpdate(
       client,
@@ -140,10 +141,11 @@ export async function startSession(
     }
 
     const totalCents = consultant.price_cents_per_min * input.durationMin;
-    const joinUrl = await createRoom(
-      input.durationMin,
-      consultant.teams_join_url,
-    );
+    // El chat no necesita sala de vídeo: la conversación va por WebSocket.
+    const joinUrl =
+      channel === "chat"
+        ? null
+        : await createRoom(input.durationMin, consultant.teams_join_url);
     const expiresAt = new Date(Date.now() + input.durationMin * 60_000);
 
     // La sesión se crea primero para tener su id como referencia del cargo.
@@ -151,6 +153,7 @@ export async function startSession(
     const session = await sessionRepo.insertSession(client, {
       userId,
       consultantId: consultant.id,
+      channel,
       durationMin: input.durationMin,
       priceCentsPerMin: consultant.price_cents_per_min,
       totalCents,
@@ -187,6 +190,7 @@ export async function startSession(
 
   return {
     sessionId: result.session.id,
+    channel: result.session.channel,
     joinUrl: result.session.join_url,
     embeddable: isEmbeddable(result.session.join_url),
     durationMin: result.session.duration_min,
@@ -298,6 +302,7 @@ export async function getAdvisorView(userId: string) {
       active && active.expires_at.getTime() > Date.now()
         ? {
             id: active.id,
+            channel: active.channel,
             joinUrl: active.join_url,
             embeddable: isEmbeddable(active.join_url),
             durationMin: active.duration_min,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Protected } from "@/components/auth/protected";
+import { ChatRoom } from "@/components/chat/chat-room";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { BarChart3D } from "@/components/site/bar-chart-3d";
 import { Logo } from "@/components/site/header";
@@ -100,6 +101,20 @@ function AdvisorContent() {
       <div className="flex min-h-screen items-center justify-center px-4">
         <p className="text-center text-ink-soft">{t.video.notConsultant}</p>
       </div>
+    );
+  }
+
+  // --- en chat: misma sala de chat que el cliente, rol asesora ---
+  if (session?.channel === "chat") {
+    return (
+      <ChatRoom
+        sessionId={session.id}
+        expiresAt={session.expiresAt}
+        peerName={t.chat.withClient}
+        myRole="consultant"
+        onExpire={load}
+        showEnd={false}
+      />
     );
   }
 

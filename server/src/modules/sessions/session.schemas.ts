@@ -12,6 +12,9 @@ export const startSessionSchema = z.object({
     .refine((v) => (ALLOWED_DURATIONS as readonly number[]).includes(v), {
       message: "Duración no permitida.",
     }),
+  // Canal de la consulta. Por defecto videollamada, para no romper llamadas
+  // antiguas que no lo enviaban.
+  channel: z.enum(["video", "chat"]).default("video"),
 });
 
 export const topupSchema = z.object({

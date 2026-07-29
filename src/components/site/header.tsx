@@ -7,6 +7,11 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Menu, SunMark } from "./icons";
+import { RechargeModal } from "./recharge-modal";
+
+function euros(cents: number): string {
+  return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
+}
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -28,9 +33,10 @@ export function Logo({ className }: { className?: string }) {
 
 export function Header() {
   const { t } = useLanguage();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, reload } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showRecharge, setShowRecharge] = useState(false);
 
   // La asesora (consultant) va a su panel; el cliente, a su dashboard.
   const accountHref =
@@ -42,7 +48,6 @@ export function Header() {
     { label: t.nav.consultores, href: "#consultores" },
     { label: t.nav.servicos, href: "#servicos" },
     { label: t.nav.blog, href: "#blog" },
-    { label: t.nav.trabalhe, href: "#trabalhe" },
   ];
 
   useEffect(() => {
@@ -81,9 +86,31 @@ export function Header() {
             <LanguageSwitcher />
           </div>
 
+          {/* saldo / cargar: conectado muestra el saldo, si no solo "Carregar" */}
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={() => setShowRecharge(true)}
+              className="btn-flame px-4 py-2.5"
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span className="whitespace-nowrap">
+                {t.available.recharge} · {euros(user?.balanceCents ?? 0)}
+              </span>
+            </button>
+          ) : (
+            <Link href="/login" className="btn-flame px-4 py-2.5">
+              <PlusIcon className="h-4 w-4" />
+              <span>{t.available.recharge}</span>
+            </Link>
+          )}
+
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Link href={accountHref} className="btn-flame px-5 py-2.5">
+              <Link
+                href={accountHref}
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-surface"
+              >
                 <UserIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">
                   {user?.displayName ?? t.header.minhaConta}
@@ -98,7 +125,10 @@ export function Header() {
               </button>
             </div>
           ) : (
-            <Link href="/login" className="btn-flame px-5 py-2.5">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/70 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-surface"
+            >
               <LogInIcon className="h-4 w-4" />
               {t.header.entrar}
             </Link>
@@ -163,7 +193,33 @@ export function Header() {
           </nav>
         </div>
       )}
+
+      {showRecharge && (
+        <RechargeModal
+          onClose={() => setShowRecharge(false)}
+          onDone={() => {
+            void reload();
+            setShowRecharge(false);
+          }}
+        />
+      )}
     </header>
+  );
+}
+
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   );
 }
 

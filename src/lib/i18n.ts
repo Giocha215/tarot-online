@@ -18,7 +18,7 @@ export const LOCALE_MAP: Record<Lang, string> = {
 
 const pt = {
   nav: {
-    consultores: "Consultores",
+    consultores: "Consultor",
     servicos: "Serviços",
     blog: "Blog",
     trabalhe: "Trabalhe connosco",
@@ -417,7 +417,7 @@ export type Dict = typeof pt;
 
 const es: Dict = {
   nav: {
-    consultores: "Consultores",
+    consultores: "Consultor",
     servicos: "Servicios",
     blog: "Blog",
     trabalhe: "Trabaja con nosotros",
@@ -813,7 +813,7 @@ const es: Dict = {
 
 const en: Dict = {
   nav: {
-    consultores: "Readers",
+    consultores: "Reader",
     servicos: "Services",
     blog: "Blog",
     trabalhe: "Work with us",

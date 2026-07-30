@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import {
+  NotificationBell,
+  useAdvisorNotifications,
+} from "@/components/advisor/notifications";
 import { AdvisorAgenda, ScheduleEditor } from "@/components/advisor/scheduling";
 import { Protected } from "@/components/auth/protected";
 import { ChatRoom } from "@/components/chat/chat-room";
@@ -79,6 +83,7 @@ function AdvisorContent() {
   }, [load]);
 
   const session = view?.activeSession ?? null;
+  const notif = useAdvisorNotifications(session?.id ?? null);
   const remaining = useCountdown(session?.expiresAt ?? null);
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
@@ -165,13 +170,16 @@ function AdvisorContent() {
       <header className="border-b border-line bg-base/85 backdrop-blur-md">
         <div className="container-tarot flex h-[72px] items-center justify-between">
           <Logo />
-          <button
-            type="button"
-            onClick={() => logout()}
-            className="rounded-full border border-line bg-surface/70 px-4 py-2 text-sm font-medium text-ink hover:bg-surface"
-          >
-            {t.auth.logout}
-          </button>
+          <div className="flex items-center gap-2.5">
+            <NotificationBell n={notif} />
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="rounded-full border border-line bg-surface/70 px-4 py-2 text-sm font-medium text-ink hover:bg-surface"
+            >
+              {t.auth.logout}
+            </button>
+          </div>
         </div>
       </header>
 

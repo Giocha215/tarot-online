@@ -235,6 +235,13 @@ const pt = {
     at: "às",
     withLabel: "com",
   },
+  notif: {
+    title: "Notificações",
+    empty: "Sem novidades.",
+    sessionStarted: "Um cliente iniciou uma consulta.",
+    newBooking: "Nova marcação",
+    enableDesktop: "Ativar avisos no ecrã",
+  },
   hero: {
     eyebrow: "Sem espera · atende já",
     titlePre: "Respostas claras para o seu futuro,",
@@ -634,6 +641,13 @@ const es: Dict = {
     at: "a las",
     withLabel: "con",
   },
+  notif: {
+    title: "Notificaciones",
+    empty: "Sin novedades.",
+    sessionStarted: "Un cliente inició una consulta.",
+    newBooking: "Nueva reserva",
+    enableDesktop: "Activar avisos de escritorio",
+  },
   hero: {
     eyebrow: "Sin espera · atiende ya",
     titlePre: "Respuestas claras para tu futuro,",
@@ -1028,6 +1042,13 @@ const en: Dict = {
     agendaEmpty: "No upcoming appointments.",
     at: "at",
     withLabel: "with",
+  },
+  notif: {
+    title: "Notifications",
+    empty: "Nothing new.",
+    sessionStarted: "A client started a consultation.",
+    newBooking: "New booking",
+    enableDesktop: "Enable desktop alerts",
   },
   hero: {
     eyebrow: "No wait · answers now",

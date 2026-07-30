@@ -9,6 +9,7 @@ import {
 import { AdvisorAgenda, ScheduleEditor } from "@/components/advisor/scheduling";
 import { Protected } from "@/components/auth/protected";
 import { ChatRoom } from "@/components/chat/chat-room";
+import { SunMark } from "@/components/site/icons";
 import { useLanguage } from "@/components/i18n/language-provider";
 import { BarChart3D } from "@/components/site/bar-chart-3d";
 import { Logo } from "@/components/site/header";
@@ -129,8 +130,11 @@ function AdvisorContent() {
     return (
       <div className="fixed inset-0 z-50 flex flex-col bg-ink">
         <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-black/40 px-4 py-3">
-          <span className="text-[0.9rem] font-semibold text-white">
-            {t.video.advisorTitle} · {view?.consultant.name}
+          <span className="flex items-center gap-2.5">
+            <SunMark className="h-6 w-6 text-accent1" />
+            <span className="text-[0.9rem] font-semibold text-white">
+              {t.video.advisorTitle} · {view?.consultant.name}
+            </span>
           </span>
           <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5">
             <span className="text-[0.72rem] uppercase tracking-wide text-white/50">
@@ -147,6 +151,7 @@ function AdvisorContent() {
         </header>
         <div className="min-h-0 flex-1">
           <iframe
+            key={session.id}
             title={t.video.title}
             src={
               session.joinUrl.includes("jit.si")

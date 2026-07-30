@@ -3,7 +3,25 @@
 import { useState } from "react";
 import { ChatRoom } from "@/components/chat/chat-room";
 import { useLanguage } from "@/components/i18n/language-provider";
+import { SunMark } from "@/components/site/icons";
 import { DURATIONS, useCountdown, useVideoCall } from "./video-provider";
+
+/** Marca clara sobre fondo oscuro para la barra de la videollamada. */
+function CallBrand() {
+  return (
+    <span className="flex items-center gap-2">
+      <SunMark className="h-6 w-6 text-accent1" />
+      <span className="flex flex-col leading-none">
+        <span className="font-cinzel text-[0.8rem] font-semibold tracking-[0.12em] text-white">
+          TAROT
+        </span>
+        <span className="font-cinzel text-[0.5rem] tracking-[0.2em] text-gold">
+          ORÁCULO DA MARIA
+        </span>
+      </span>
+    </span>
+  );
+}
 
 function euros(cents: number): string {
   return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
@@ -227,15 +245,18 @@ function CallRoom() {
     <div className="fixed inset-0 z-[60] flex flex-col bg-ink">
       {/* cabecera: consultora + temporizador + terminar */}
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-black/40 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal/60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal" />
-          </span>
-          <span className="text-[0.9rem] text-white/80">
-            {t.video.inCall}{" "}
-            <span className="font-semibold text-white">
-              {v.active.consultant.name}
+        <div className="flex items-center gap-3">
+          <CallBrand />
+          <span className="hidden items-center gap-2 sm:flex">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal/60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal" />
+            </span>
+            <span className="text-[0.9rem] text-white/80">
+              {t.video.inCall}{" "}
+              <span className="font-semibold text-white">
+                {v.active.consultant.name}
+              </span>
             </span>
           </span>
         </div>
@@ -278,6 +299,7 @@ function CallRoom() {
       <div className="relative min-h-0 flex-1">
         {v.active.embeddable && v.active.joinUrl ? (
           <iframe
+            key={v.active.sessionId}
             title={t.video.title}
             src={
               v.active.joinUrl.includes("jit.si")

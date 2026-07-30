@@ -132,9 +132,10 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         setActive(result);
         setBalanceCents(result.balanceCents);
         setPhase("active");
-        // Vídeo con sala externa (Teams): abrir en pestaña nueva. El chat no
-        // tiene joinUrl, así que este bloque no aplica.
-        if (result.channel === "video" && result.joinUrl) {
+        // Solo abrir pestaña nueva si el vídeo NO es embebible (Teams). Las
+        // salas embebibles (Daily) se quedan dentro de la página: así no se
+        // entra dos veces a la sala y el mensaje de fin se ve aquí mismo.
+        if (result.channel === "video" && result.joinUrl && !result.embeddable) {
           window.open(result.joinUrl, "_blank", "noopener,noreferrer");
         }
       } catch (err) {
@@ -156,7 +157,8 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     setActive(result);
     setBalanceCents(result.balanceCents);
     setPhase("active");
-    if (result.channel === "video" && result.joinUrl) {
+    // Igual que confirmStart: solo pestaña nueva si NO es embebible (Teams).
+    if (result.channel === "video" && result.joinUrl && !result.embeddable) {
       window.open(result.joinUrl, "_blank", "noopener,noreferrer");
     }
   }, []);

@@ -23,8 +23,8 @@ export function Logo({ className }: { className?: string }) {
         <span className="font-cinzel text-[0.95rem] font-semibold tracking-[0.14em] text-ink">
           TAROT
         </span>
-        <span className="font-cinzel text-[0.62rem] tracking-[0.42em] text-accent1">
-          DEMO
+        <span className="font-cinzel text-[0.6rem] tracking-[0.24em] text-accent1">
+          ORÁCULO DA MARIA
         </span>
       </span>
     </Link>

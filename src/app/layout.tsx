@@ -22,7 +22,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Tarot Online — Respostas claras para o seu futuro",
+  title: "Tarot Oráculo da Maria — Respostas claras para o seu futuro",
   description:
     "Consultas de tarot por chat, telefone ou email. Tarólogos certificados, resposta imediata e pagamento seguro por MB Way, Multibanco ou cartão.",
 };

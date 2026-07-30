@@ -18,6 +18,7 @@ import {
   fetchAdvisorStats,
   fetchAdvisorView,
   fetchRechargePrice,
+  serverNow,
   setConsultantStatus,
   updateAdvisorRate,
   updateRechargePrice,
@@ -41,7 +42,7 @@ function useCountdown(expiresAt: string | null): number {
     if (!expiresAt) return;
     const target = new Date(expiresAt).getTime();
     const tick = () =>
-      setRemaining(Math.max(0, Math.round((target - Date.now()) / 1000)));
+      setRemaining(Math.max(0, Math.round((target - serverNow()) / 1000)));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);

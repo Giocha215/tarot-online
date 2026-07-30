@@ -84,7 +84,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       .fetchActiveSession()
       .then(({ session }) => {
         if (cancelled || !session) return;
-        if (new Date(session.expiresAt).getTime() <= Date.now()) return;
+        if (new Date(session.expiresAt).getTime() <= api.serverNow()) return;
         setActive({
           sessionId: session.id,
           channel: session.channel === "chat" ? "chat" : "video",
@@ -272,7 +272,7 @@ export function useCountdown(expiresAt: string | null, onExpire: () => void) {
     const target = new Date(expiresAt).getTime();
 
     const tick = () => {
-      const secs = Math.max(0, Math.round((target - Date.now()) / 1000));
+      const secs = Math.max(0, Math.round((target - api.serverNow()) / 1000));
       setRemaining(secs);
       if (secs <= 0 && !firedRef.current) {
         firedRef.current = true;

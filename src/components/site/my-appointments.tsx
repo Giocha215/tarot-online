@@ -21,7 +21,7 @@ export function MyAppointments({ refreshKey }: { refreshKey: number }) {
   const { isAuthenticated, reload, user } = useAuth();
   const video = useVideoCall();
   const [items, setItems] = useState<Appointment[]>([]);
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => api.serverNow());
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -39,7 +39,7 @@ export function MyAppointments({ refreshKey }: { refreshKey: number }) {
   // Reevalúa la ventana de "Entrar" y refresca cada 20 s.
   useEffect(() => {
     const id = setInterval(() => {
-      setNow(Date.now());
+      setNow(api.serverNow());
       load();
     }, 20_000);
     return () => clearInterval(id);

@@ -38,6 +38,10 @@ export function createApp(): Express {
         callback(null, false);
       },
       credentials: true, // imprescindible para la cookie de refresh
+      // Exponemos la cabecera Date para que el cliente pueda sincronizar su
+      // reloj con el del servidor (temporizadores de sesión sin depender del
+      // reloj del dispositivo, que puede estar desajustado).
+      exposedHeaders: ["Date"],
     }),
   );
 

@@ -7,6 +7,25 @@ const API_URL =
 export const WS_URL = `${API_URL.replace(/^http/, "ws")}/ws`;
 
 /**
+ * Desfase (ms) entre el reloj del dispositivo y el del servidor, calculado con
+ * la cabecera `Date` de las respuestas. Así los temporizadores de sesión no
+ * dependen del reloj local (que puede estar adelantado/atrasado).
+ */
+let clockOffsetMs = 0;
+
+/** "Ahora" según el servidor: reloj local corregido por el desfase. */
+export function serverNow(): number {
+  return Date.now() - clockOffsetMs;
+}
+
+function syncClockFromResponse(res: Response): void {
+  const dateHeader = res.headers.get("date");
+  if (!dateHeader) return;
+  const serverMs = Date.parse(dateHeader);
+  if (!Number.isNaN(serverMs)) clockOffsetMs = Date.now() - serverMs;
+}
+
+/**
  * El access token vive SOLO en memoria de módulo: ni localStorage ni cookie
  * legible. Un XSS no puede leerlo con `localStorage.getItem`, y al recargar la
  * página se recupera la sesión vía /refresh (cookie httpOnly).
@@ -62,6 +81,8 @@ export async function apiFetch<T>(
     credentials: "include",
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+
+  syncClockFromResponse(res);
 
   if (res.status === 401 && auth && !_retry) {
     const renewed = await refreshSession();

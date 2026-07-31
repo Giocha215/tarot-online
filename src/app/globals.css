@@ -168,11 +168,8 @@
     transform: rotateY(360deg);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .photo3d-prism {
-    animation: none;
-  }
-}
+/* El giro se mantiene aunque el sistema pida "reducir movimiento": es el
+   elemento de marca principal y el giro es lento (16s). */
 
 /* Efecto "flotante" para la foto 3D en el modal. */
 .photo3d-float {
@@ -185,10 +182,5 @@
   }
   50% {
     transform: translateY(-12px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .photo3d-float {
-    animation: none;
   }
 }

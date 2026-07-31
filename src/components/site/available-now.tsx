@@ -11,6 +11,7 @@ import { BookingModal } from "./booking-modal";
 import { CONSULTANTS, type Consultant } from "./data";
 import { MyAppointments } from "./my-appointments";
 import { RechargeModal } from "./recharge-modal";
+import { RotatingPhotos3D } from "./rotating-photos";
 import {
   ArrowRight,
   Chat,
@@ -90,6 +91,7 @@ function ConsultantCard({
   const { isAuthenticated } = useAuth();
   const [showBooking, setShowBooking] = useState(false);
   const online = status === "online" || status === undefined;
+  const hasPhotos = (c.photos?.length ?? 0) > 1;
 
   // Precio por minuto real (de la API). Mientras carga usamos 500 como
   // referencia, pero el importe que se cobra lo recalcula el servidor.
@@ -114,12 +116,16 @@ function ConsultantCard({
     <article className="flex w-[320px] shrink-0 snap-start flex-col rounded-2xl border border-line bg-surface p-4 shadow-soft transition-shadow hover:shadow-card">
       <div className="flex items-start gap-3">
         <div className="relative">
-          <img
-            src={c.avatar}
-            alt={c.name}
-            className="h-16 w-16 rounded-2xl object-cover ring-1 ring-line"
-            loading="lazy"
-          />
+          {hasPhotos ? (
+            <RotatingPhotos3D photos={c.photos!} size={80} alt={c.name} />
+          ) : (
+            <img
+              src={c.avatar}
+              alt={c.name}
+              className="h-16 w-16 rounded-2xl object-cover ring-1 ring-line"
+              loading="lazy"
+            />
+          )}
           <span
             className={cn(
               "absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-surface",
@@ -163,7 +169,7 @@ function ConsultantCard({
             <Clock className="h-3.5 w-3.5" /> {t.available.busyIn} &gt;
             {activeDurationMin} {t.video.minutes}
           </span>
-        ) : (
+        ) : hasPhotos ? null : (
           <span className="inline-flex items-center gap-1 text-teal">
             <Clock className="h-3.5 w-3.5" /> {t.available.respondeEm}
           </span>
@@ -176,10 +182,12 @@ function ConsultantCard({
         <span className="text-subtle">({c.reviews})</span>
       </div>
 
-      <p className="mt-2 line-clamp-2 min-h-[2.6rem] rounded-lg bg-soft/60 px-3 py-2 text-[0.8rem] italic text-ink-soft">
-        “{tr?.quote}”
-        {tr?.ago && <span className="not-italic text-subtle"> · {tr.ago}</span>}
-      </p>
+      {!hasPhotos && (
+        <p className="mt-2 line-clamp-2 min-h-[2.6rem] rounded-lg bg-soft/60 px-3 py-2 text-[0.8rem] italic text-ink-soft">
+          “{tr?.quote}”
+          {tr?.ago && <span className="not-italic text-subtle"> · {tr.ago}</span>}
+        </p>
+      )}
 
       <div className="mt-3 flex gap-2">
         <ChannelButton

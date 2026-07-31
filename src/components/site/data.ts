@@ -5,11 +5,20 @@ export interface Consultant {
   rating: number;
   reviews: number;
   isNew?: boolean;
+  /** Varias fotos → carrusel 3D en la ficha (en vez del avatar único). */
+  photos?: string[];
 }
 
 // Demo: una sola consultora disponible (la que controla la asesora en /asesora).
 export const CONSULTANTS: Consultant[] = [
-  { name: "Carmen", slug: "carmen-oxeu", avatar: "/images/2733282868.jpeg", rating: 5.0, reviews: 88 },
+  {
+    name: "Carmen",
+    slug: "carmen-oxeu",
+    avatar: "/images/2733282868.jpeg",
+    rating: 5.0,
+    reviews: 88,
+    photos: ["/images/maria-1.jpg", "/images/maria-2.jpg", "/images/maria-3.jpg"],
+  },
 ];
 
 export interface AIConsultant {

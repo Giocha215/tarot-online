@@ -57,7 +57,13 @@ async function createDailyRoom(durationMin: number): Promise<string> {
       properties: {
         exp,
         eject_at_room_exp: true,
-        enable_prejoin_ui: false,
+        // Pantalla previa activada: cada participante concede cámara/micrófono
+        // y ve su vídeo antes de entrar. Evita que alguien quede sin cámara por
+        // no haber dado permiso (el auto-join silencioso fallaba).
+        enable_prejoin_ui: true,
+        // Arrancar con cámara y micrófono encendidos.
+        start_video_off: false,
+        start_audio_off: false,
       },
     }),
   });

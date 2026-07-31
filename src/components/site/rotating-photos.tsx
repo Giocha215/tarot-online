@@ -17,7 +17,9 @@ export function RotatingPhotos3D({
 }) {
   const faces = photos.slice(0, 6);
   const n = Math.max(faces.length, 1);
-  const radius = Math.round(size * 0.5);
+  // Radio = apotema del prisma de n caras: así las fotos quedan casi pegadas
+  // (sin hueco visible entre ellas) mientras gira, en vez de separadas.
+  const radius = n < 2 ? 0 : Math.round(size / 2 / Math.tan(Math.PI / n));
 
   return (
     <div className="photo3d-stage" style={{ width: size, height: size }}>

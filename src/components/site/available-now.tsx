@@ -117,7 +117,7 @@ function ConsultantCard({
       <div className="flex items-center gap-3">
         <div className="relative">
           {hasPhotos ? (
-            <RotatingPhotos3D photos={c.photos!} size={140} alt={c.name} />
+            <RotatingPhotos3D photos={c.photos!} size={128} alt={c.name} />
           ) : (
             <img
               src={c.avatar}

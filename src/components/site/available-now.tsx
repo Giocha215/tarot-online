@@ -114,10 +114,10 @@ function ConsultantCard({
 
   return (
     <article className="flex w-[320px] shrink-0 snap-start flex-col rounded-2xl border border-line bg-surface p-4 shadow-soft transition-shadow hover:shadow-card">
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <div className="relative">
           {hasPhotos ? (
-            <RotatingPhotos3D photos={c.photos!} size={80} alt={c.name} />
+            <RotatingPhotos3D photos={c.photos!} size={140} alt={c.name} />
           ) : (
             <img
               src={c.avatar}

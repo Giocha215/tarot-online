@@ -12,7 +12,7 @@ export interface Consultant {
 // Demo: una sola consultora disponible (la que controla la asesora en /asesora).
 export const CONSULTANTS: Consultant[] = [
   {
-    name: "Carmen",
+    name: "Maria",
     slug: "carmen-oxeu",
     avatar: "/images/2733282868.jpeg",
     rating: 5.0,

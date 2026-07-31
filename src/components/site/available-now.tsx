@@ -90,8 +90,10 @@ function ConsultantCard({
   const video = useVideoCall();
   const { isAuthenticated } = useAuth();
   const [showBooking, setShowBooking] = useState(false);
+  const [showPhoto, setShowPhoto] = useState(false);
   const online = status === "online" || status === undefined;
   const hasPhotos = (c.photos?.length ?? 0) > 1;
+  const bio = hasPhotos ? t.available.advisorBio : undefined;
 
   // Precio por minuto real (de la API). Mientras carga usamos 500 como
   // referencia, pero el importe que se cobra lo recalcula el servidor.
@@ -117,7 +119,15 @@ function ConsultantCard({
       <div className="flex items-center gap-3">
         <div className="relative">
           {hasPhotos ? (
-            <RotatingPhotos3D photos={c.photos!} size={128} alt={c.name} />
+            <button
+              type="button"
+              onClick={() => setShowPhoto(true)}
+              className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              aria-label={c.name}
+              title={c.name}
+            >
+              <RotatingPhotos3D photos={c.photos!} size={128} alt={c.name} />
+            </button>
           ) : (
             <img
               src={c.avatar}
@@ -247,6 +257,46 @@ function ConsultantCard({
           onClose={() => setShowBooking(false)}
           onBooked={onBooked}
         />
+      )}
+
+      {/* modal flotante: foto 3D en grande + bio */}
+      {showPhoto && hasPhotos && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm"
+          onClick={() => setShowPhoto(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-3xl border border-line bg-surface px-8 py-10 text-center shadow-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowPhoto(false)}
+              className="absolute right-4 top-4 text-lg text-ink-soft hover:text-accent1"
+              aria-label={t.video.close}
+            >
+              ✕
+            </button>
+            <div className="photo3d-float mx-auto w-fit">
+              <RotatingPhotos3D photos={c.photos!} size={240} alt={c.name} />
+            </div>
+            <h3 className="mt-8 font-cinzel text-2xl font-semibold text-ink">
+              {c.name}
+            </h3>
+            {bio && (
+              <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">
+                {bio}
+              </p>
+            )}
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-[0.85rem]">
+              <Star className="h-4 w-4 text-gold" />
+              <span className="font-semibold text-ink">
+                {c.rating.toFixed(1)}
+              </span>
+              <span className="text-subtle">({c.reviews})</span>
+            </div>
+          </div>
+        </div>
       )}
     </article>
   );

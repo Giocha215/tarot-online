@@ -106,6 +106,7 @@ const pt = {
     },
   },
   available: {
+    advisorBio: "Maria — especialista em consultoria espiritual com mais de 20 anos de experiência.",
     titlePre: "Disponíveis",
     titleAccent: "agora",
     subtitle:
@@ -512,6 +513,7 @@ const es: Dict = {
     },
   },
   available: {
+    advisorBio: "Maria — experta consultora espiritual con más de 20 años de experiencia.",
     titlePre: "Disponibles",
     titleAccent: "ahora",
     subtitle:
@@ -914,6 +916,7 @@ const en: Dict = {
     },
   },
   available: {
+    advisorBio: "Maria — expert spiritual advisor with over 20 years of experience.",
     titlePre: "Available",
     titleAccent: "now",
     subtitle:

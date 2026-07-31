@@ -133,6 +133,14 @@
   }
 }
 
+/* En móvil, el portugués (textos más largos) se ve al 90% para que cuadre.
+   En español/inglés se deja al 100%, que ya encaja bien. */
+@media (max-width: 767px) {
+  html[data-ui-lang="pt"] {
+    zoom: 0.9;
+  }
+}
+
 /* Carrusel 3D de fotos (ficha de consultora). CSS global para que los
    @keyframes se apliquen con seguridad (styled-jsx los reescribía). */
 .photo3d-stage {

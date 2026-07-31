@@ -38,6 +38,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Refleja el idioma en el <html> para poder ajustar el CSS por idioma
+  // (p. ej. el zoom del móvil en portugués).
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dataset.uiLang = lang;
+  }, [lang]);
+
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     try {

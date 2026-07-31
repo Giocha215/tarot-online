@@ -132,3 +132,44 @@
     transform: rotateY(180deg);
   }
 }
+
+/* Carrusel 3D de fotos (ficha de consultora). CSS global para que los
+   @keyframes se apliquen con seguridad (styled-jsx los reescribía). */
+.photo3d-stage {
+  perspective: 900px;
+}
+.photo3d-prism {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: photo3d-spin 16s linear infinite;
+}
+.photo3d-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 0 0 1px hsl(var(--c-line));
+}
+.photo3d-face > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@keyframes photo3d-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo3d-prism {
+    animation: none;
+  }
+}

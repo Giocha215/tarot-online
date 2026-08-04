@@ -30,8 +30,10 @@ export const consultantStatusSchema = z.object({
 });
 
 export const updateRateSchema = z.object({
-  // Precio por minuto en céntimos. Entre 0,10 € y 100 €/min.
+  // Precio por minuto de la videollamada, en céntimos. Entre 0,10 € y 100 €/min.
   priceCentsPerMin: z.number().int().min(10).max(10_000),
+  // Precio por minuto del chat (opcional; si falta, se conserva el actual).
+  chatPriceCentsPerMin: z.number().int().min(10).max(10_000).optional(),
 });
 
 /** Recarga por horas: el cliente solo elige cuántas horas (1 a 10). */

@@ -146,7 +146,12 @@ export async function startSession(
       );
     }
 
-    const totalCents = consultant.price_cents_per_min * input.durationMin;
+    // Precio por minuto según el canal: chat o videollamada.
+    const perMin =
+      channel === "chat"
+        ? consultant.chat_price_cents_per_min
+        : consultant.price_cents_per_min;
+    const totalCents = perMin * input.durationMin;
     // El chat no necesita sala de vídeo: la conversación va por WebSocket.
     const joinUrl =
       channel === "chat"
@@ -161,7 +166,7 @@ export async function startSession(
       consultantId: consultant.id,
       channel,
       durationMin: input.durationMin,
-      priceCentsPerMin: consultant.price_cents_per_min,
+      priceCentsPerMin: perMin,
       totalCents,
       joinUrl,
       expiresAt,
@@ -410,6 +415,7 @@ export async function getAdvisorSessions(userId: string) {
     totalCents: totals.totalCents,
     count: totals.count,
     priceCentsPerMin: consultant.price_cents_per_min,
+    chatPriceCentsPerMin: consultant.chat_price_cents_per_min,
   };
 }
 
@@ -424,11 +430,16 @@ export async function getAdvisorStats(userId: string) {
   return { daily, monthly, totalCents: totals.totalCents, count: totals.count };
 }
 
-/** La asesora cambia su tarifa (precio por minuto), en céntimos. */
-export async function updateAdvisorRate(userId: string, priceCentsPerMin: number) {
+/** La asesora cambia sus tarifas por minuto (videollamada y chat), en céntimos. */
+export async function updateAdvisorRate(
+  userId: string,
+  priceCentsPerMin: number,
+  chatPriceCentsPerMin?: number,
+) {
   const consultant = await requireOwnedConsultant(userId);
-  await consultantRepo.updateRate(consultant.id, priceCentsPerMin);
-  return { priceCentsPerMin };
+  const chat = chatPriceCentsPerMin ?? consultant.chat_price_cents_per_min;
+  await consultantRepo.updateRates(consultant.id, priceCentsPerMin, chat);
+  return { priceCentsPerMin, chatPriceCentsPerMin: chat };
 }
 
 /**

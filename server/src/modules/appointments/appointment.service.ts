@@ -74,7 +74,11 @@ export async function getAvailableSlots(
   }
 
   slots.sort();
-  return { slots, priceCentsPerMin: consultant.price_cents_per_min };
+  return {
+    slots,
+    priceCentsPerMin: consultant.price_cents_per_min,
+    chatPriceCentsPerMin: consultant.chat_price_cents_per_min,
+  };
 }
 
 /** Reserva una cita y cobra por adelantado (política: cobro al reservar). */
@@ -100,7 +104,12 @@ export async function bookAppointment(
 
   const startAt = new Date(input.startAt);
   const endAt = new Date(startAt.getTime() + input.durationMin * 60_000);
-  const totalCents = consultant.price_cents_per_min * input.durationMin;
+  // Precio por minuto según el canal reservado.
+  const perMin =
+    input.channel === "chat"
+      ? consultant.chat_price_cents_per_min
+      : consultant.price_cents_per_min;
+  const totalCents = perMin * input.durationMin;
 
   const result = await withTransaction(async (client) => {
     // Recheca solapamiento bajo lock para evitar dobles reservas.
@@ -119,7 +128,7 @@ export async function bookAppointment(
       userId,
       channel: input.channel,
       durationMin: input.durationMin,
-      priceCentsPerMin: consultant.price_cents_per_min,
+      priceCentsPerMin: perMin,
       totalCents,
       startAt,
       endAt,

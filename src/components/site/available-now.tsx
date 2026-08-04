@@ -73,6 +73,7 @@ function ConsultantCard({
   status,
   activeDurationMin,
   priceCentsPerMin,
+  chatPriceCentsPerMin,
   onBooked,
 }: {
   c: Consultant;
@@ -81,8 +82,10 @@ function ConsultantCard({
   status?: "online" | "busy" | "offline";
   /** Minutos de la consulta en curso cuando está ocupada. */
   activeDurationMin?: number | null;
-  /** Precio por minuto en vivo (lo fija la asesora); undefined mientras carga. */
+  /** Precio por minuto de la videollamada; undefined mientras carga. */
   priceCentsPerMin?: number;
+  /** Precio por minuto del chat; undefined mientras carga. */
+  chatPriceCentsPerMin?: number;
   /** Se llama al reservar una cita, para refrescar "Mis citas". */
   onBooked: () => void;
 }) {
@@ -95,10 +98,14 @@ function ConsultantCard({
   const hasPhotos = (c.photos?.length ?? 0) > 1;
   const bio = hasPhotos ? t.available.advisorBio : undefined;
 
-  // Precio por minuto real (de la API). Mientras carga usamos 500 como
-  // referencia, pero el importe que se cobra lo recalcula el servidor.
+  // Precios por minuto reales (de la API), distintos para vídeo y chat.
+  // Mientras carga usamos 500 como referencia; el importe lo recalcula el servidor.
+  const euroMin = (cents: number) =>
+    `${(cents / 100).toFixed(2).replace(".", ",")}€/min`;
   const perMinCents = priceCentsPerMin ?? 500;
-  const pricePerMinLabel = `${(perMinCents / 100).toFixed(2).replace(".", ",")}€/min`;
+  const chatPerMinCents = chatPriceCentsPerMin ?? 500;
+  const pricePerMinLabel = euroMin(perMinCents);
+  const chatPriceLabel = euroMin(chatPerMinCents);
 
   // Color y etiqueta del indicador según el estado.
   const dot =
@@ -203,14 +210,14 @@ function ConsultantCard({
         <ChannelButton
           icon={<Chat className="h-3.5 w-3.5" />}
           label={online ? t.channels.chat : statusLabel}
-          price={online ? pricePerMinLabel : "—"}
+          price={online ? chatPriceLabel : "—"}
           tone="flame"
           disabled={!online}
           onClick={() =>
             video.requestCall({
               slug: c.slug,
               name: c.name,
-              priceCentsPerMinute: perMinCents,
+              priceCentsPerMinute: chatPerMinCents,
               channel: "chat",
             })
           }
@@ -378,6 +385,7 @@ export function AvailableNow() {
         status: "online" | "busy" | "offline";
         activeDurationMin: number | null;
         priceCentsPerMin: number;
+        chatPriceCentsPerMin: number;
       }
     >
   >({});
@@ -394,6 +402,7 @@ export function AvailableNow() {
               status: "online" | "busy" | "offline";
               activeDurationMin: number | null;
               priceCentsPerMin: number;
+              chatPriceCentsPerMin: number;
             }
           > = {};
           for (const c of consultants)
@@ -401,6 +410,7 @@ export function AvailableNow() {
               status: c.status,
               activeDurationMin: c.activeDurationMin,
               priceCentsPerMin: c.priceCentsPerMinute,
+              chatPriceCentsPerMin: c.chatPriceCentsPerMinute,
             };
           setStatuses(map);
         })
@@ -483,6 +493,7 @@ export function AvailableNow() {
             status={statuses[c.slug]?.status}
             activeDurationMin={statuses[c.slug]?.activeDurationMin}
             priceCentsPerMin={statuses[c.slug]?.priceCentsPerMin}
+            chatPriceCentsPerMin={statuses[c.slug]?.chatPriceCentsPerMin}
             onBooked={() => setApptRefresh((n) => n + 1)}
           />
         ))}

@@ -253,6 +253,7 @@ function AdvisorDashboard() {
   const [sessions, setSessions] = useState<AdvisorSessions | null>(null);
   const [stats, setStats] = useState<AdvisorStats | null>(null);
   const [rateEuros, setRateEuros] = useState("");
+  const [chatRateEuros, setChatRateEuros] = useState("");
   const [rechargeEuros, setRechargeEuros] = useState("");
   const [savingRate, setSavingRate] = useState(false);
   const [rateSaved, setRateSaved] = useState(false);
@@ -262,6 +263,7 @@ function AdvisorDashboard() {
       .then((s) => {
         setSessions(s);
         setRateEuros((s.priceCentsPerMin / 100).toFixed(2));
+        setChatRateEuros((s.chatPriceCentsPerMin / 100).toFixed(2));
       })
       .catch(() => {});
     fetchAdvisorStats()
@@ -283,8 +285,14 @@ function AdvisorDashboard() {
     setRateSaved(false);
     try {
       const rateCents = Math.round(Number(rateEuros.replace(",", ".")) * 100);
+      const chatCents = Math.round(
+        Number(chatRateEuros.replace(",", ".")) * 100,
+      );
       if (Number.isFinite(rateCents) && rateCents >= 10) {
-        await updateAdvisorRate(rateCents);
+        await updateAdvisorRate(
+          rateCents,
+          Number.isFinite(chatCents) && chatCents >= 10 ? chatCents : undefined,
+        );
       }
       const rechargeCents = Math.round(
         Number(rechargeEuros.replace(",", ".")) * 100,
@@ -299,7 +307,7 @@ function AdvisorDashboard() {
     } finally {
       setSavingRate(false);
     }
-  }, [rateEuros, rechargeEuros, load]);
+  }, [rateEuros, chatRateEuros, rechargeEuros, load]);
 
   const rateCents = Math.round(Number(rateEuros.replace(",", ".")) * 100) || 0;
 
@@ -310,10 +318,10 @@ function AdvisorDashboard() {
         <h2 className="font-cinzel text-[1.1rem] font-semibold text-ink">
           {t.video.dashRates}
         </h2>
-        <div className="mt-4 flex items-end gap-2">
-          <div className="flex-1">
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div>
             <label className="mb-1 block text-[0.8rem] text-ink-soft">
-              {t.video.ratePerMin}
+              {t.channels.videochamada} (€/min)
             </label>
             <input
               type="number"
@@ -322,6 +330,22 @@ function AdvisorDashboard() {
               value={rateEuros}
               onChange={(e) => {
                 setRateEuros(e.target.value);
+                setRateSaved(false);
+              }}
+              className="h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[0.8rem] text-ink-soft">
+              {t.channels.chat} (€/min)
+            </label>
+            <input
+              type="number"
+              step="0.10"
+              min="0.10"
+              value={chatRateEuros}
+              onChange={(e) => {
+                setChatRateEuros(e.target.value);
                 setRateSaved(false);
               }}
               className="h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"

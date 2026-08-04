@@ -36,7 +36,8 @@ export function BookingModal({
   const [channel, setChannel] = useState<"chat" | "video">("chat");
   const [duration, setDuration] = useState(30);
   const [slots, setSlots] = useState<string[] | null>(null);
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState(0); // videollamada
+  const [chatPrice, setChatPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [day, setDay] = useState<string | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export function BookingModal({
         if (cancelled) return;
         setSlots(r.slots);
         setPrice(r.priceCentsPerMin);
+        setChatPrice(r.chatPriceCentsPerMin);
       })
       .catch(() => !cancelled && setSlots([]))
       .finally(() => !cancelled && setLoading(false));
@@ -96,7 +98,9 @@ export function BookingModal({
     if (days.length && !day) setDay(days[0]!);
   }, [days, day]);
 
-  const cost = price * duration;
+  // Precio por minuto según el canal elegido (chat o videollamada).
+  const perMin = channel === "chat" ? chatPrice : price;
+  const cost = perMin * duration;
   const affordable = (user?.balanceCents ?? 0) >= cost;
 
   async function confirm() {
@@ -268,7 +272,7 @@ export function BookingModal({
             <div className="mt-4 space-y-1 rounded-xl bg-soft/60 p-3 text-[0.9rem]">
               <div className="flex justify-between">
                 <span className="text-ink-soft">
-                  {euros(price)}
+                  {euros(perMin)}
                   {t.video.perMin} × {duration} {t.video.minutes}
                 </span>
                 <span className="font-semibold text-ink">

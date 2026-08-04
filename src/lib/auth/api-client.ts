@@ -218,7 +218,10 @@ export interface Consultant {
   slug: string;
   name: string;
   status: "online" | "busy" | "offline";
+  /** Precio por minuto de la videollamada. */
   priceCentsPerMinute: number;
+  /** Precio por minuto del chat. */
+  chatPriceCentsPerMinute: number;
   available: boolean;
   /** Si está ocupada, minutos contratados de la consulta en curso. */
   activeDurationMin: number | null;
@@ -338,7 +341,8 @@ export function updateRechargePrice(
 
 export interface SlotsResult {
   slots: string[]; // instantes UTC (ISO)
-  priceCentsPerMin: number;
+  priceCentsPerMin: number; // videollamada
+  chatPriceCentsPerMin: number; // chat
 }
 
 export function fetchSlots(
@@ -470,7 +474,8 @@ export interface AdvisorSessions {
   sessions: SessionRecord[];
   totalCents: number;
   count: number;
-  priceCentsPerMin: number;
+  priceCentsPerMin: number; // videollamada
+  chatPriceCentsPerMin: number; // chat
 }
 
 export function fetchAdvisorSessions(): Promise<AdvisorSessions> {
@@ -496,11 +501,12 @@ export function fetchAdvisorStats(): Promise<AdvisorStats> {
 
 export function updateAdvisorRate(
   priceCentsPerMin: number,
-): Promise<{ priceCentsPerMin: number }> {
+  chatPriceCentsPerMin?: number,
+): Promise<{ priceCentsPerMin: number; chatPriceCentsPerMin: number }> {
   return apiFetch("/api/consultants/me/rate", {
     method: "PATCH",
     auth: true,
-    body: { priceCentsPerMin },
+    body: { priceCentsPerMin, chatPriceCentsPerMin },
   });
 }
 

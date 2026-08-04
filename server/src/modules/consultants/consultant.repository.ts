@@ -8,7 +8,10 @@ export interface ConsultantRow {
   slug: string;
   name: string;
   status: ConsultantStatus;
+  /** Precio por minuto de la VIDEOLLAMADA. */
   price_cents_per_min: number;
+  /** Precio por minuto del CHAT. */
+  chat_price_cents_per_min: number;
   teams_join_url: string | null;
   owner_user_id: string | null;
 }
@@ -23,7 +26,10 @@ export interface PublicConsultant {
   slug: string;
   name: string;
   status: ConsultantStatus;
+  /** Precio por minuto de la videollamada. */
   priceCentsPerMinute: number;
+  /** Precio por minuto del chat. */
+  chatPriceCentsPerMinute: number;
   /** Disponible = online y sin sesión activa. */
   available: boolean;
   /** Si está ocupada, minutos contratados de la consulta en curso. */
@@ -31,7 +37,7 @@ export interface PublicConsultant {
 }
 
 const COLUMNS = `id, slug, name, status, price_cents_per_min,
-                 teams_join_url, owner_user_id`;
+                 chat_price_cents_per_min, teams_join_url, owner_user_id`;
 
 export function toPublicConsultant(
   row: ConsultantRow & { active_duration_min?: number | null },
@@ -42,6 +48,7 @@ export function toPublicConsultant(
     name: row.name,
     status: row.status,
     priceCentsPerMinute: row.price_cents_per_min,
+    chatPriceCentsPerMinute: row.chat_price_cents_per_min,
     available: row.status === "online",
     activeDurationMin: row.active_duration_min ?? null,
   };
@@ -103,14 +110,18 @@ export async function setStatus(
   else await query(q, [id, status]);
 }
 
-export async function updateRate(
+/** Actualiza el precio por minuto de videollamada y de chat. */
+export async function updateRates(
   id: string,
   priceCentsPerMin: number,
+  chatPriceCentsPerMin: number,
 ): Promise<void> {
-  await query("UPDATE consultants SET price_cents_per_min = $2 WHERE id = $1", [
-    id,
-    priceCentsPerMin,
-  ]);
+  await query(
+    `UPDATE consultants
+        SET price_cents_per_min = $2, chat_price_cents_per_min = $3
+      WHERE id = $1`,
+    [id, priceCentsPerMin, chatPriceCentsPerMin],
+  );
 }
 
 export async function findByOwner(

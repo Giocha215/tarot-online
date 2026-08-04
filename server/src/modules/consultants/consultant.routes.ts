@@ -145,6 +145,7 @@ consultantsRouter.patch(
         await sessionService.updateAdvisorRate(
           req.user!.sub,
           req.body.priceCentsPerMin,
+          req.body.chatPriceCentsPerMin,
         ),
       );
     } catch (err) {

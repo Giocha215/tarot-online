@@ -399,6 +399,71 @@ export function updateReading(
   });
 }
 
+// ---- Trabajos / rituales a precio fijo (pedidos con formulario) ----
+
+export interface Work {
+  id: string;
+  name: string;
+  priceCents: number;
+  requiresCouple: boolean;
+  active: boolean;
+}
+
+export function fetchWorks(slug: string): Promise<{ works: Work[] }> {
+  return apiFetch(`/api/consultants/${slug}/works`);
+}
+
+export function fetchAdvisorWorks(): Promise<{ works: Work[] }> {
+  return apiFetch("/api/consultants/me/works", { auth: true });
+}
+
+export function updateWork(
+  id: string,
+  priceCents: number,
+  active: boolean,
+): Promise<Work> {
+  return apiFetch(`/api/consultants/me/works/${id}`, {
+    method: "PATCH",
+    auth: true,
+    body: { priceCents, active },
+  });
+}
+
+export function placeOrder(input: {
+  consultantSlug: string;
+  workServiceId: string;
+  fullName: string;
+  birthdate: string;
+  partnerName?: string;
+  partnerBirthdate?: string;
+  notes?: string;
+}): Promise<{
+  id: string;
+  workName: string;
+  priceCents: number;
+  balanceCents: number;
+}> {
+  return apiFetch("/api/orders", { method: "POST", auth: true, body: input });
+}
+
+export interface AdvisorOrder {
+  id: string;
+  workName: string;
+  priceCents: number;
+  fullName: string;
+  birthdate: string | null;
+  partnerName: string | null;
+  partnerBirthdate: string | null;
+  notes: string | null;
+  status: string;
+  createdAt: string;
+  clientEmail: string;
+}
+
+export function fetchAdvisorOrders(): Promise<{ orders: AdvisorOrder[] }> {
+  return apiFetch("/api/consultants/me/orders", { auth: true });
+}
+
 export function bookAppointment(input: {
   consultantSlug: string;
   channel: "video" | "chat";

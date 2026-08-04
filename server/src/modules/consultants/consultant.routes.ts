@@ -5,6 +5,8 @@ import { setAvailabilitySchema } from "../appointments/appointment.schemas.js";
 import * as appointmentService from "../appointments/appointment.service.js";
 import { updateReadingSchema } from "../readings/reading.schemas.js";
 import * as readingService from "../readings/reading.service.js";
+import { updateWorkSchema } from "../works/work.schemas.js";
+import * as workService from "../works/work.service.js";
 import {
   consultantStatusSchema,
   rechargePriceSchema,
@@ -101,6 +103,65 @@ consultantsRouter.get("/:slug/readings", async (req, res, next) => {
   try {
     res.json({
       readings: await readingService.getPublicReadings(req.params.slug as string),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Trabajos/rituales de la asesora (leer / editar precio) + pedidos recibidos.
+consultantsRouter.get(
+  "/me/works",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json({ works: await workService.getAdvisorWorks(req.user!.sub) });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+consultantsRouter.patch(
+  "/me/works/:id",
+  authenticate,
+  requireRole("consultant", "admin"),
+  validateBody(updateWorkSchema),
+  async (req, res, next) => {
+    try {
+      res.json(
+        await workService.updateAdvisorWork(
+          req.user!.sub,
+          req.params.id as string,
+          req.body.priceCents,
+          req.body.active,
+        ),
+      );
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+consultantsRouter.get(
+  "/me/orders",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json({ orders: await workService.getAdvisorOrders(req.user!.sub) });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Catálogo público de trabajos de una consultora.
+consultantsRouter.get("/:slug/works", async (req, res, next) => {
+  try {
+    res.json({
+      works: await workService.getPublicWorks(req.params.slug as string),
     });
   } catch (err) {
     next(err);

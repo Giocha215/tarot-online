@@ -1,6 +1,7 @@
 import { AvailableNow } from "@/components/site/available-now";
 import { Blog } from "@/components/site/blog";
 import { ReadingsCatalog } from "@/components/site/readings-catalog";
+import { WorksCatalog } from "@/components/site/works-catalog";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
 import { Hero } from "@/components/site/hero";
@@ -44,6 +45,7 @@ export default function Home() {
         <Spreads />
         <AvailableNow />
         <ReadingsCatalog />
+        <WorksCatalog />
         <Hero />
         <Trust />
         <Horoscope />

@@ -10,6 +10,7 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { consultantsRouter } from "./modules/consultants/consultant.routes.js";
 import { servicesRouter } from "./modules/services/services.routes.js";
 import { sessionsRouter } from "./modules/sessions/session.routes.js";
+import { ordersRouter } from "./modules/works/work.routes.js";
 import { stripeWebhookHandler } from "./modules/wallet/webhook.js";
 
 /**
@@ -67,6 +68,7 @@ export function createApp(): Express {
   app.use("/api/consultants", consultantsRouter);
   app.use("/api/sessions", sessionsRouter);
   app.use("/api/appointments", appointmentsRouter);
+  app.use("/api/orders", ordersRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

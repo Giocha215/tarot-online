@@ -8,6 +8,7 @@ import {
 } from "@/components/advisor/notifications";
 import { ReadingsEditor } from "@/components/advisor/readings-editor";
 import { AdvisorAgenda, ScheduleEditor } from "@/components/advisor/scheduling";
+import { OrdersList, WorksEditor } from "@/components/advisor/works-admin";
 import { Protected } from "@/components/auth/protected";
 import { ChatRoom } from "@/components/chat/chat-room";
 import { SunMark } from "@/components/site/icons";
@@ -236,10 +237,12 @@ function AdvisorContent() {
           <p className="text-[0.9rem] text-ink-soft">{t.video.waitingClient}</p>
         </div>
 
-        {/* agenda, horario de trabajo y servicios de Tarot */}
+        {/* agenda, horario, servicios de Tarot y trabajos */}
         <AdvisorAgenda />
+        <OrdersList />
         <ScheduleEditor />
         <ReadingsEditor />
+        <WorksEditor />
 
         {/* módulos: tarifas, facturación y sesiones */}
         <AdvisorDashboard />

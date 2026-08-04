@@ -8,12 +8,14 @@ const durationField = z
     message: "Duración no permitida.",
   });
 
-/** Reservar una cita: canal, duración y el instante de inicio (ISO UTC). */
+/** Reservar una cita: canal, duración y el instante de inicio (ISO UTC).
+ *  readingServiceId (opcional) → lectura de Tarot a precio fijo. */
 export const bookAppointmentSchema = z.object({
   consultantSlug: z.string().trim().min(1, "Falta la consultora."),
   channel: z.enum(["video", "chat"]),
   durationMin: durationField,
   startAt: z.string().datetime({ message: "Fecha inválida." }),
+  readingServiceId: z.string().uuid().optional(),
 });
 
 /** Franja de trabajo: minutos desde medianoche, en hora de la asesora. */

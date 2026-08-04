@@ -21,11 +21,14 @@ function euros(cents: number): string {
 export function BookingModal({
   consultantSlug,
   consultantName,
+  reading,
   onClose,
   onBooked,
 }: {
   consultantSlug: string;
   consultantName: string;
+  /** Si se pasa una lectura, la reserva es a precio fijo (canal/duración fijos). */
+  reading?: api.Reading;
   onClose: () => void;
   onBooked: () => void;
 }) {
@@ -33,8 +36,10 @@ export function BookingModal({
   const locale = LOCALE_MAP[lang];
   const { isAuthenticated, user, reload } = useAuth();
 
-  const [channel, setChannel] = useState<"chat" | "video">("chat");
-  const [duration, setDuration] = useState(30);
+  const [channel, setChannel] = useState<"chat" | "video">(
+    reading?.channel ?? "chat",
+  );
+  const [duration, setDuration] = useState(reading?.durationMin ?? 30);
   const [slots, setSlots] = useState<string[] | null>(null);
   const [price, setPrice] = useState(0); // videollamada
   const [chatPrice, setChatPrice] = useState(0);
@@ -98,9 +103,9 @@ export function BookingModal({
     if (days.length && !day) setDay(days[0]!);
   }, [days, day]);
 
-  // Precio por minuto según el canal elegido (chat o videollamada).
+  // Precio por minuto según el canal (chat/vídeo); si es lectura, precio fijo.
   const perMin = channel === "chat" ? chatPrice : price;
-  const cost = perMin * duration;
+  const cost = reading ? reading.priceCents : perMin * duration;
   const affordable = (user?.balanceCents ?? 0) >= cost;
 
   async function confirm() {
@@ -113,6 +118,7 @@ export function BookingModal({
         channel,
         durationMin: duration,
         startAt: slot,
+        readingServiceId: reading?.id,
       });
       setDone(true);
       void reload();
@@ -165,48 +171,68 @@ export function BookingModal({
           </div>
         ) : (
           <>
-            {/* canal */}
-            <p className="mt-4 text-[0.82rem] font-medium text-ink-soft">
-              {t.booking.channel}
-            </p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {(["chat", "video"] as const).map((ch) => (
-                <button
-                  key={ch}
-                  type="button"
-                  onClick={() => setChannel(ch)}
-                  className={
-                    ch === channel
-                      ? "rounded-lg border-2 border-accent1 bg-accent1/10 py-2 text-[0.85rem] font-semibold text-accent1"
-                      : "rounded-lg border border-line py-2 text-[0.85rem] text-ink-soft hover:border-accent1/50"
-                  }
-                >
-                  {ch === "chat" ? t.channels.chat : t.channels.videochamada}
-                </button>
-              ))}
-            </div>
+            {reading ? (
+              /* lectura de Tarot: nombre + duración + precio fijo */
+              <div className="mt-4 flex items-center justify-between rounded-xl bg-soft/60 px-4 py-3">
+                <div>
+                  <p className="font-medium text-ink">{reading.name}</p>
+                  <p className="text-[0.8rem] text-ink-soft">
+                    {reading.durationMin} {t.video.minutes} ·{" "}
+                    {reading.channel === "chat"
+                      ? t.channels.chat
+                      : t.channels.videochamada}
+                  </p>
+                </div>
+                <span className="font-cinzel text-lg font-semibold text-accent1">
+                  {euros(reading.priceCents)}
+                </span>
+              </div>
+            ) : (
+              <>
+                {/* canal */}
+                <p className="mt-4 text-[0.82rem] font-medium text-ink-soft">
+                  {t.booking.channel}
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {(["chat", "video"] as const).map((ch) => (
+                    <button
+                      key={ch}
+                      type="button"
+                      onClick={() => setChannel(ch)}
+                      className={
+                        ch === channel
+                          ? "rounded-lg border-2 border-accent1 bg-accent1/10 py-2 text-[0.85rem] font-semibold text-accent1"
+                          : "rounded-lg border border-line py-2 text-[0.85rem] text-ink-soft hover:border-accent1/50"
+                      }
+                    >
+                      {ch === "chat" ? t.channels.chat : t.channels.videochamada}
+                    </button>
+                  ))}
+                </div>
 
-            {/* duración */}
-            <p className="mt-4 text-[0.82rem] font-medium text-ink-soft">
-              {t.video.chooseDuration}
-            </p>
-            <div className="mt-2 grid grid-cols-5 gap-1.5">
-              {DURATIONS.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setDuration(d)}
-                  className={
-                    d === duration
-                      ? "rounded-lg border-2 border-accent1 bg-accent1/10 py-2 text-[0.78rem] font-semibold text-accent1"
-                      : "rounded-lg border border-line py-2 text-[0.78rem] text-ink-soft hover:border-accent1/50"
-                  }
-                >
-                  {d}
-                  {t.video.minutes}
-                </button>
-              ))}
-            </div>
+                {/* duración */}
+                <p className="mt-4 text-[0.82rem] font-medium text-ink-soft">
+                  {t.video.chooseDuration}
+                </p>
+                <div className="mt-2 grid grid-cols-5 gap-1.5">
+                  {DURATIONS.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDuration(d)}
+                      className={
+                        d === duration
+                          ? "rounded-lg border-2 border-accent1 bg-accent1/10 py-2 text-[0.78rem] font-semibold text-accent1"
+                          : "rounded-lg border border-line py-2 text-[0.78rem] text-ink-soft hover:border-accent1/50"
+                      }
+                    >
+                      {d}
+                      {t.video.minutes}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* día */}
             <div className="mt-4 flex items-center justify-between">
@@ -272,8 +298,9 @@ export function BookingModal({
             <div className="mt-4 space-y-1 rounded-xl bg-soft/60 p-3 text-[0.9rem]">
               <div className="flex justify-between">
                 <span className="text-ink-soft">
-                  {euros(perMin)}
-                  {t.video.perMin} × {duration} {t.video.minutes}
+                  {reading
+                    ? reading.name
+                    : `${euros(perMin)}${t.video.perMin} × ${duration} ${t.video.minutes}`}
                 </span>
                 <span className="font-semibold text-ink">
                   {t.video.cost}: {euros(cost)}

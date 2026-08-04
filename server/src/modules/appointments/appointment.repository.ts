@@ -25,6 +25,7 @@ export interface AppointmentWithNames extends AppointmentRow {
   consultant_name: string;
   consultant_slug: string;
   client_name: string;
+  reading_name: string | null;
 }
 
 // --------------------------- disponibilidad -----------------------
@@ -111,13 +112,14 @@ export async function insert(
     totalCents: number;
     startAt: Date;
     endAt: Date;
+    readingServiceId?: string | null;
   },
 ): Promise<AppointmentRow> {
   const { rows } = await client.query<AppointmentRow>(
     `INSERT INTO appointments
        (consultant_id, user_id, channel, duration_min, price_cents_per_min,
-        total_cents, start_at, end_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        total_cents, start_at, end_at, reading_service_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING *`,
     [
       params.consultantId,
@@ -128,6 +130,7 @@ export async function insert(
       params.totalCents,
       params.startAt,
       params.endAt,
+      params.readingServiceId ?? null,
     ],
   );
   return rows[0] as AppointmentRow;
@@ -171,10 +174,11 @@ export async function listUpcomingForUser(
 ): Promise<AppointmentWithNames[]> {
   const { rows } = await query<AppointmentWithNames>(
     `SELECT a.*, c.name AS consultant_name, c.slug AS consultant_slug,
-            u.display_name AS client_name
+            u.display_name AS client_name, rs.name AS reading_name
        FROM appointments a
        JOIN consultants c ON c.id = a.consultant_id
        JOIN users u ON u.id = a.user_id
+       LEFT JOIN reading_services rs ON rs.id = a.reading_service_id
       WHERE a.user_id = $1 AND a.status = 'booked' AND a.end_at > NOW()
       ORDER BY a.start_at ASC`,
     [userId],
@@ -188,10 +192,11 @@ export async function listUpcomingForConsultant(
 ): Promise<AppointmentWithNames[]> {
   const { rows } = await query<AppointmentWithNames>(
     `SELECT a.*, c.name AS consultant_name, c.slug AS consultant_slug,
-            u.display_name AS client_name
+            u.display_name AS client_name, rs.name AS reading_name
        FROM appointments a
        JOIN consultants c ON c.id = a.consultant_id
        JOIN users u ON u.id = a.user_id
+       LEFT JOIN reading_services rs ON rs.id = a.reading_service_id
       WHERE a.consultant_id = $1 AND a.status = 'booked' AND a.end_at > NOW()
       ORDER BY a.start_at ASC`,
     [consultantId],
@@ -212,5 +217,6 @@ export function toPublicAppointment(row: AppointmentWithNames) {
     endAt: row.end_at.toISOString(),
     status: row.status,
     sessionId: row.session_id,
+    readingName: row.reading_name,
   };
 }

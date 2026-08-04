@@ -89,6 +89,7 @@ export async function bookAppointment(
     channel: "video" | "chat";
     durationMin: number;
     startAt: string;
+    readingServiceId?: string;
   },
 ) {
   const consultant = await consultantRepo.findBySlug(input.consultantSlug);
@@ -96,20 +97,40 @@ export async function bookAppointment(
     throw notFound("CONSULTANT_NOT_FOUND", "La consultora no existe.");
   }
 
+  // Si es una lectura de Tarot (precio fijo), el canal, la duración y el
+  // importe salen de la lectura (no del precio por minuto).
+  let channel = input.channel;
+  let durationMin = input.durationMin;
+  let readingId: string | null = null;
+  let fixedTotal: number | null = null;
+  if (input.readingServiceId) {
+    const { findById } = await import("../readings/reading.repository.js");
+    const reading = await findById(input.readingServiceId);
+    if (!reading || reading.consultant_id !== consultant.id || !reading.active) {
+      throw notFound("READING_NOT_FOUND", "Esa lectura no está disponible.");
+    }
+    channel = reading.channel;
+    durationMin = reading.duration_min;
+    readingId = reading.id;
+    fixedTotal = reading.price_cents;
+  }
+
   // El inicio pedido debe ser uno de los huecos válidos ahora mismo.
-  const { slots } = await getAvailableSlots(input.consultantSlug, input.durationMin);
+  const { slots } = await getAvailableSlots(input.consultantSlug, durationMin);
   if (!slots.includes(input.startAt)) {
     throw conflict("SLOT_UNAVAILABLE", "Ese horario ya no está disponible.");
   }
 
   const startAt = new Date(input.startAt);
-  const endAt = new Date(startAt.getTime() + input.durationMin * 60_000);
-  // Precio por minuto según el canal reservado.
+  const endAt = new Date(startAt.getTime() + durationMin * 60_000);
+  // Precio: fijo (lectura) o por minuto según el canal.
   const perMin =
-    input.channel === "chat"
-      ? consultant.chat_price_cents_per_min
-      : consultant.price_cents_per_min;
-  const totalCents = perMin * input.durationMin;
+    fixedTotal != null
+      ? 0
+      : channel === "chat"
+        ? consultant.chat_price_cents_per_min
+        : consultant.price_cents_per_min;
+  const totalCents = fixedTotal != null ? fixedTotal : perMin * durationMin;
 
   const result = await withTransaction(async (client) => {
     // Recheca solapamiento bajo lock para evitar dobles reservas.
@@ -126,12 +147,13 @@ export async function bookAppointment(
     const appt = await apptRepo.insert(client, {
       consultantId: consultant.id,
       userId,
-      channel: input.channel,
-      durationMin: input.durationMin,
+      channel,
+      durationMin,
       priceCentsPerMin: perMin,
       totalCents,
       startAt,
       endAt,
+      readingServiceId: readingId,
     });
 
     const charged = await walletRepo.applyTransaction(client, {

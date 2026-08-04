@@ -3,6 +3,8 @@ import { authenticate, requireRole } from "../../middleware/authenticate.js";
 import { validateBody } from "../../middleware/validate.js";
 import { setAvailabilitySchema } from "../appointments/appointment.schemas.js";
 import * as appointmentService from "../appointments/appointment.service.js";
+import { updateReadingSchema } from "../readings/reading.schemas.js";
+import * as readingService from "../readings/reading.service.js";
 import {
   consultantStatusSchema,
   rechargePriceSchema,
@@ -58,6 +60,52 @@ consultantsRouter.get(
     }
   },
 );
+
+// Catálogo de lecturas de Tarot de la asesora (leer / editar precio).
+consultantsRouter.get(
+  "/me/readings",
+  authenticate,
+  requireRole("consultant", "admin"),
+  async (req, res, next) => {
+    try {
+      res.json({ readings: await readingService.getAdvisorReadings(req.user!.sub) });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+consultantsRouter.patch(
+  "/me/readings/:id",
+  authenticate,
+  requireRole("consultant", "admin"),
+  validateBody(updateReadingSchema),
+  async (req, res, next) => {
+    try {
+      res.json(
+        await readingService.updateAdvisorReading(
+          req.user!.sub,
+          req.params.id as string,
+          req.body.priceCents,
+          req.body.active,
+        ),
+      );
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Catálogo público de lecturas de una consultora.
+consultantsRouter.get("/:slug/readings", async (req, res, next) => {
+  try {
+    res.json({
+      readings: await readingService.getPublicReadings(req.params.slug as string),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Huecos libres para agendar con una consultora (público).
 consultantsRouter.get("/:slug/slots", async (req, res, next) => {

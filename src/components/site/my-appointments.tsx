@@ -98,9 +98,10 @@ export function MyAppointments({ refreshKey }: { refreshKey: number }) {
               <div className="min-w-0">
                 <p className="text-[0.9rem] font-medium text-ink">
                   {a.consultantName} ·{" "}
-                  {a.channel === "chat"
-                    ? t.channels.chat
-                    : t.channels.videochamada}
+                  {a.readingName ??
+                    (a.channel === "chat"
+                      ? t.channels.chat
+                      : t.channels.videochamada)}
                 </p>
                 <p className="text-[0.8rem] text-ink-soft">
                   {dayFmt.format(new Date(a.startAt))} · {a.durationMin}

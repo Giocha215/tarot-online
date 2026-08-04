@@ -364,6 +364,39 @@ export interface Appointment {
   endAt: string;
   status: "booked" | "cancelled" | "completed";
   sessionId: string | null;
+  /** Nombre de la lectura de Tarot, si la cita es una lectura a precio fijo. */
+  readingName: string | null;
+}
+
+// ---- Catálogo de lecturas de Tarot (precio fijo) ----
+
+export interface Reading {
+  id: string;
+  name: string;
+  priceCents: number;
+  durationMin: number;
+  channel: "video" | "chat";
+  active: boolean;
+}
+
+export function fetchReadings(slug: string): Promise<{ readings: Reading[] }> {
+  return apiFetch(`/api/consultants/${slug}/readings`);
+}
+
+export function fetchAdvisorReadings(): Promise<{ readings: Reading[] }> {
+  return apiFetch("/api/consultants/me/readings", { auth: true });
+}
+
+export function updateReading(
+  id: string,
+  priceCents: number,
+  active: boolean,
+): Promise<Reading> {
+  return apiFetch(`/api/consultants/me/readings/${id}`, {
+    method: "PATCH",
+    auth: true,
+    body: { priceCents, active },
+  });
 }
 
 export function bookAppointment(input: {
@@ -371,6 +404,7 @@ export function bookAppointment(input: {
   channel: "video" | "chat";
   durationMin: number;
   startAt: string;
+  readingServiceId?: string;
 }): Promise<{
   id: string;
   channel: "video" | "chat";

@@ -6,6 +6,7 @@ import {
   NotificationBell,
   useAdvisorNotifications,
 } from "@/components/advisor/notifications";
+import { ReadingsEditor } from "@/components/advisor/readings-editor";
 import { AdvisorAgenda, ScheduleEditor } from "@/components/advisor/scheduling";
 import { Protected } from "@/components/auth/protected";
 import { ChatRoom } from "@/components/chat/chat-room";
@@ -235,9 +236,10 @@ function AdvisorContent() {
           <p className="text-[0.9rem] text-ink-soft">{t.video.waitingClient}</p>
         </div>
 
-        {/* agenda y horario de trabajo */}
+        {/* agenda, horario de trabajo y servicios de Tarot */}
         <AdvisorAgenda />
         <ScheduleEditor />
+        <ReadingsEditor />
 
         {/* módulos: tarifas, facturación y sesiones */}
         <AdvisorDashboard />

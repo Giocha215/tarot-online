@@ -211,7 +211,10 @@ export function AdvisorAgenda() {
               </span>
               <span className="text-[0.85rem] text-ink-soft">
                 {t.schedule.withLabel} {a.clientName} ·{" "}
-                {a.channel === "chat" ? t.channels.chat : t.channels.videochamada}{" "}
+                {a.readingName ??
+                  (a.channel === "chat"
+                    ? t.channels.chat
+                    : t.channels.videochamada)}{" "}
                 · {a.durationMin}
                 {t.video.minutes}
               </span>

@@ -82,6 +82,8 @@ export interface OrderInsert {
   priceCents: number;
   fullName: string;
   birthdate: string;
+  phone: string;
+  email: string;
   partnerName: string | null;
   partnerBirthdate: string | null;
   notes: string | null;
@@ -94,8 +96,8 @@ export async function insertOrder(
   const { rows } = await client.query<{ id: string }>(
     `INSERT INTO work_orders
        (consultant_id, user_id, work_service_id, work_name, price_cents,
-        full_name, birthdate, partner_name, partner_birthdate, notes)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        full_name, birthdate, phone, email, partner_name, partner_birthdate, notes)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
      RETURNING id`,
     [
       p.consultantId,
@@ -105,6 +107,8 @@ export async function insertOrder(
       p.priceCents,
       p.fullName,
       p.birthdate,
+      p.phone,
+      p.email,
       p.partnerName,
       p.partnerBirthdate,
       p.notes,
@@ -119,6 +123,8 @@ interface OrderRow {
   price_cents: number;
   full_name: string;
   birthdate: Date;
+  phone: string | null;
+  email: string | null;
   partner_name: string | null;
   partner_birthdate: Date | null;
   notes: string | null;
@@ -130,8 +136,8 @@ interface OrderRow {
 export async function listByConsultantOrders(consultantId: string) {
   const { rows } = await query<OrderRow>(
     `SELECT o.id, o.work_name, o.price_cents, o.full_name, o.birthdate,
-            o.partner_name, o.partner_birthdate, o.notes, o.status, o.created_at,
-            u.email AS client_email
+            o.phone, o.email, o.partner_name, o.partner_birthdate, o.notes,
+            o.status, o.created_at, u.email AS client_email
        FROM work_orders o
        JOIN users u ON u.id = o.user_id
       WHERE o.consultant_id = $1
@@ -139,14 +145,15 @@ export async function listByConsultantOrders(consultantId: string) {
       LIMIT 200`,
     [consultantId],
   );
-  const iso = (d: Date | null) =>
-    d ? d.toISOString().slice(0, 10) : null;
+  const iso = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
   return rows.map((o) => ({
     id: o.id,
     workName: o.work_name,
     priceCents: o.price_cents,
     fullName: o.full_name,
     birthdate: iso(o.birthdate),
+    phone: o.phone,
+    email: o.email,
     partnerName: o.partner_name,
     partnerBirthdate: iso(o.partner_birthdate),
     notes: o.notes,

@@ -50,6 +50,8 @@ export async function placeOrder(
     workServiceId: string;
     fullName: string;
     birthdate: string;
+    phone: string;
+    email: string;
     partnerName?: string;
     partnerBirthdate?: string;
     notes?: string;
@@ -79,6 +81,8 @@ export async function placeOrder(
       priceCents: work.price_cents,
       fullName: input.fullName,
       birthdate: input.birthdate,
+      phone: input.phone,
+      email: input.email,
       partnerName: work.requires_couple ? (input.partnerName ?? null) : null,
       partnerBirthdate: work.requires_couple
         ? (input.partnerBirthdate ?? null)

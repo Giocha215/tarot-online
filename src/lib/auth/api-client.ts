@@ -434,6 +434,8 @@ export function placeOrder(input: {
   workServiceId: string;
   fullName: string;
   birthdate: string;
+  phone: string;
+  email: string;
   partnerName?: string;
   partnerBirthdate?: string;
   notes?: string;
@@ -452,6 +454,8 @@ export interface AdvisorOrder {
   priceCents: number;
   fullName: string;
   birthdate: string | null;
+  phone: string | null;
+  email: string | null;
   partnerName: string | null;
   partnerBirthdate: string | null;
   notes: string | null;

@@ -107,6 +107,7 @@ const pt = {
   },
   available: {
     advisorBio: "Maria — especialista em consultoria espiritual com mais de 20 anos de experiência.",
+    moreServices: "Mais serviços",
     titlePre: "Disponíveis",
     titleAccent: "agora",
     subtitle:
@@ -225,6 +226,7 @@ const pt = {
     empty: "Ainda não tem marcações.",
     readingsTitle: "Serviços de Tarot",
     readingsSubtitle: "Escolha uma leitura, pague e agende a sua consulta.",
+    pick: "Escolha uma leitura",
     readingsManage: "Serviços de Tarot (preços)",
     readingsActive: "Ativo",
     readingsSave: "Guardar",
@@ -246,6 +248,9 @@ const pt = {
     submitting: "A processar...",
     success: "Pedido enviado! Maria entrará em contacto.",
     coupleHint: "Este trabalho requer os dados do casal.",
+    phone: "Telefone / telemóvel",
+    email: "Email",
+    pick: "Escolha um trabalho",
   },
   schedule: {
     title: "Horário de trabalho",
@@ -537,6 +542,7 @@ const es: Dict = {
   },
   available: {
     advisorBio: "Maria — experta consultora espiritual con más de 20 años de experiencia.",
+    moreServices: "Más servicios",
     titlePre: "Disponibles",
     titleAccent: "ahora",
     subtitle:
@@ -655,6 +661,7 @@ const es: Dict = {
     empty: "Aún no tienes citas.",
     readingsTitle: "Servicios de Tarot",
     readingsSubtitle: "Elige una lectura, paga y agenda tu consulta.",
+    pick: "Elige una lectura",
     readingsManage: "Servicios de Tarot (precios)",
     readingsActive: "Activo",
     readingsSave: "Guardar",
@@ -676,6 +683,9 @@ const es: Dict = {
     submitting: "Procesando...",
     success: "¡Pedido enviado! Maria se pondrá en contacto.",
     coupleHint: "Este trabajo requiere los datos de la pareja.",
+    phone: "Teléfono / celular",
+    email: "Correo electrónico",
+    pick: "Elige un trabajo",
   },
   schedule: {
     title: "Horario de trabajo",
@@ -963,6 +973,7 @@ const en: Dict = {
   },
   available: {
     advisorBio: "Maria — expert spiritual advisor with over 20 years of experience.",
+    moreServices: "More services",
     titlePre: "Available",
     titleAccent: "now",
     subtitle:
@@ -1081,6 +1092,7 @@ const en: Dict = {
     empty: "You have no appointments yet.",
     readingsTitle: "Tarot services",
     readingsSubtitle: "Choose a reading, pay and book your session.",
+    pick: "Choose a reading",
     readingsManage: "Tarot services (prices)",
     readingsActive: "Active",
     readingsSave: "Save",
@@ -1102,6 +1114,9 @@ const en: Dict = {
     submitting: "Processing...",
     success: "Order sent! Maria will get in touch.",
     coupleHint: "This work requires the couple's details.",
+    phone: "Phone / mobile",
+    email: "Email",
+    pick: "Choose a work",
   },
   schedule: {
     title: "Working hours",

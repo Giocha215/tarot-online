@@ -11,6 +11,7 @@ import { BookingModal } from "./booking-modal";
 import { CONSULTANTS, type Consultant } from "./data";
 import { MyAppointments } from "./my-appointments";
 import { RechargeModal } from "./recharge-modal";
+import { ServicesCard } from "./services-card";
 import { RotatingPhotos3D } from "./rotating-photos";
 import {
   ArrowRight,
@@ -498,6 +499,7 @@ export function AvailableNow() {
           />
         ))}
         <CreditCard t={t} />
+        <ServicesCard />
       </div>
 
       {/* dots */}

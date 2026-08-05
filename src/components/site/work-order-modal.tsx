@@ -1,97 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLanguage } from "@/components/i18n/language-provider";
-import { useVideoCall } from "@/components/video/video-provider";
 import * as api from "@/lib/auth/api-client";
 import type { Work } from "@/lib/auth/api-client";
 import { ApiError } from "@/lib/auth/types";
-import { CONSULTANTS } from "./data";
 import { RechargeModal } from "./recharge-modal";
 
 function euros(cents: number): string {
   return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
-/** Catálogo de trabajos/rituales a precio fijo. El cliente paga y envía datos. */
-export function WorksCatalog() {
-  const { t } = useLanguage();
-  const { isAuthenticated } = useAuth();
-  const video = useVideoCall();
-  const [works, setWorks] = useState<Work[]>([]);
-  const [selected, setSelected] = useState<Work | null>(null);
-
-  const slug = CONSULTANTS[0]?.slug ?? "carmen-oxeu";
-  const name = CONSULTANTS[0]?.name ?? "Maria";
-
-  useEffect(() => {
-    api
-      .fetchWorks(slug)
-      .then(({ works }) => setWorks(works))
-      .catch(() => {});
-  }, [slug]);
-
-  if (works.length === 0) return null;
-
-  return (
-    <section id="trabalhos" className="container-tarot scroll-mt-24 pt-16">
-      <h2 className="font-serif text-3xl text-ink sm:text-4xl">
-        {t.works.title}
-      </h2>
-      <p className="mt-1 text-ink-soft">{t.works.subtitle}</p>
-
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {works.map((w) => (
-          <div
-            key={w.id}
-            className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4 shadow-soft"
-          >
-            <div className="min-w-0">
-              <p className="font-medium leading-snug text-ink">{w.name}</p>
-              {w.requiresCouple && (
-                <p className="mt-0.5 text-[0.72rem] text-subtle">
-                  {t.works.coupleHint}
-                </p>
-              )}
-            </div>
-            <div className="flex shrink-0 flex-col items-end gap-1.5">
-              <span className="font-cinzel text-lg font-semibold text-accent1">
-                {euros(w.priceCents)}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  isAuthenticated
-                    ? setSelected(w)
-                    : video.requestCall({
-                        slug,
-                        name,
-                        priceCentsPerMinute: 0,
-                        channel: "video",
-                      })
-                }
-                className="rounded-full border border-accent1/60 bg-accent1/5 px-4 py-1.5 text-[0.78rem] font-semibold text-accent1 hover:bg-accent1/10"
-              >
-                {t.works.order}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {selected && (
-        <WorkOrderModal
-          consultantSlug={slug}
-          work={selected}
-          onClose={() => setSelected(null)}
-        />
-      )}
-    </section>
-  );
-}
-
-function WorkOrderModal({
+/** Formulario de pedido de un trabajo: datos del cliente + pago del precio fijo. */
+export function WorkOrderModal({
   consultantSlug,
   work,
   onClose,
@@ -105,6 +27,8 @@ function WorkOrderModal({
 
   const [fullName, setFullName] = useState("");
   const [birthdate, setBirthdate] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [partnerBirthdate, setPartnerBirthdate] = useState("");
   const [notes, setNotes] = useState("");
@@ -114,12 +38,14 @@ function WorkOrderModal({
   const [showRecharge, setShowRecharge] = useState(false);
 
   const affordable = (user?.balanceCents ?? 0) >= work.priceCents;
+  const isDate = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v);
   const valid =
     fullName.trim().length >= 2 &&
-    /^\d{4}-\d{2}-\d{2}$/.test(birthdate) &&
+    isDate(birthdate) &&
+    phone.trim().length >= 5 &&
+    /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) &&
     (!work.requiresCouple ||
-      (partnerName.trim().length >= 2 &&
-        /^\d{4}-\d{2}-\d{2}$/.test(partnerBirthdate)));
+      (partnerName.trim().length >= 2 && isDate(partnerBirthdate)));
 
   async function submit() {
     if (!valid) return;
@@ -131,6 +57,8 @@ function WorkOrderModal({
         workServiceId: work.id,
         fullName: fullName.trim(),
         birthdate,
+        phone: phone.trim(),
+        email: email.trim(),
         partnerName: work.requiresCouple ? partnerName.trim() : undefined,
         partnerBirthdate: work.requiresCouple ? partnerBirthdate : undefined,
         notes: notes.trim() || undefined,
@@ -192,6 +120,30 @@ function WorkOrderModal({
                   value={birthdate}
                   onChange={(e) => setBirthdate(e.target.value)}
                 />
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-[0.8rem] text-ink-soft">
+                    {t.works.phone}
+                  </label>
+                  <input
+                    type="tel"
+                    className={inputCls}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[0.8rem] text-ink-soft">
+                    {t.works.email}
+                  </label>
+                  <input
+                    type="email"
+                    className={inputCls}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
               </div>
               {work.requiresCouple && (
                 <>

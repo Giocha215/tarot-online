@@ -16,6 +16,8 @@ export const placeOrderSchema = z.object({
   workServiceId: z.string().uuid(),
   fullName: z.string().trim().min(2, "Falta el nombre completo.").max(200),
   birthdate: dateStr,
+  phone: z.string().trim().min(5, "Falta el teléfono.").max(40),
+  email: z.string().trim().email("Correo inválido."),
   partnerName: z.string().trim().min(2).max(200).optional(),
   partnerBirthdate: dateStr.optional(),
   notes: z.string().trim().max(1000).optional(),

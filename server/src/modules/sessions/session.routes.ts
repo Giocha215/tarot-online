@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../../middleware/authenticate.js";
 import { validateBody } from "../../middleware/validate.js";
 import {
+  rechargeAmountSchema,
   rechargeHoursSchema,
   startSessionSchema,
   topupSchema,
@@ -87,6 +88,23 @@ sessionsRouter.post(
       const result = await sessionService.startTopupByHours(
         req.user!.sub,
         req.body.hours,
+      );
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Recarga por importe personalizado (hasta 1000 €).
+sessionsRouter.post(
+  "/wallet/checkout-amount",
+  validateBody(rechargeAmountSchema),
+  async (req, res, next) => {
+    try {
+      const result = await sessionService.startTopupAmount(
+        req.user!.sub,
+        req.body.amountCents,
       );
       res.status(201).json(result);
     } catch (err) {

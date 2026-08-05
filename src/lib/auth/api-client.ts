@@ -319,6 +319,20 @@ export function startTopup(
   });
 }
 
+/** Recarga por importe personalizado (en céntimos, hasta 1000 €). */
+export function startTopupAmount(
+  amountCents: number,
+): Promise<
+  | { mode: "stripe"; url: string }
+  | { mode: "demo"; balanceCents: number }
+> {
+  return apiFetch("/api/sessions/wallet/checkout-amount", {
+    method: "POST",
+    auth: true,
+    body: { amountCents },
+  });
+}
+
 /** Precio por hora de la recarga (público). */
 export function fetchRechargePrice(): Promise<{ pricePerHourCents: number }> {
   return apiFetch("/api/services/recharge-price");

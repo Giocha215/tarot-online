@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/i18n/language-provider";
-import { fetchRechargePrice, startTopup } from "@/lib/auth/api-client";
+import {
+  fetchRechargePrice,
+  startTopup,
+  startTopupAmount,
+} from "@/lib/auth/api-client";
+
+const MAX_CENTS = 100_000; // 1000 €
 
 const HOURS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -21,6 +27,7 @@ export function RechargeModal({
   const { t } = useLanguage();
   const [pricePerHourCents, setPricePerHourCents] = useState<number | null>(null);
   const [hours, setHours] = useState(1);
+  const [customEuros, setCustomEuros] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -31,13 +38,22 @@ export function RechargeModal({
   }, []);
 
   const perHour = pricePerHourCents ?? 0;
-  const amountCents = perHour * hours;
+  // Importe personalizado (si se escribe) tiene prioridad sobre las horas.
+  const customCents = Math.round(
+    Number(customEuros.replace(",", ".")) * 100,
+  );
+  const usingCustom = Number.isFinite(customCents) && customCents >= 100;
+  const amountCents = usingCustom
+    ? Math.min(customCents, MAX_CENTS)
+    : perHour * hours;
 
   async function pay() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await startTopup(hours);
+      const res = usingCustom
+        ? await startTopupAmount(amountCents)
+        : await startTopup(hours);
       if (res.mode === "stripe") {
         setMessage(t.available.rechargeRedirect);
         window.location.href = res.url;
@@ -78,7 +94,7 @@ export function RechargeModal({
         </p>
         <div className="mt-2 grid grid-cols-5 gap-1.5">
           {HOURS.map((h) => {
-            const selected = h === hours;
+            const selected = h === hours && !usingCustom;
             return (
               <button
                 key={h}
@@ -105,6 +121,26 @@ export function RechargeModal({
           })}
         </div>
 
+        {/* importe personalizado (hasta 1000 €) */}
+        <p className="mt-4 text-[0.85rem] text-ink-soft">
+          {t.available.rechargeCustom}
+        </p>
+        <div className="mt-2 flex items-center gap-2">
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            step="1"
+            inputMode="decimal"
+            value={customEuros}
+            onChange={(e) => setCustomEuros(e.target.value)}
+            placeholder="0"
+            className="h-11 w-full rounded-xl border border-line bg-surface px-4 text-ink focus-visible:border-accent1 focus-visible:outline-none"
+          />
+          <span className="text-ink-soft">€</span>
+        </div>
+        <p className="mt-1 text-[0.68rem] text-subtle">máx. 1000 €</p>
+
         {message && <p className="mt-3 text-[0.85rem] text-teal">{message}</p>}
 
         <button
@@ -115,7 +151,9 @@ export function RechargeModal({
         >
           {loading
             ? "…"
-            : `${t.available.rechargePay} ${hours} ${t.available.rechargeHours} · ${euros(amountCents)}`}
+            : usingCustom
+              ? `${t.available.rechargePay} · ${euros(amountCents)}`
+              : `${t.available.rechargePay} ${hours} ${t.available.rechargeHours} · ${euros(amountCents)}`}
         </button>
         <button
           type="button"

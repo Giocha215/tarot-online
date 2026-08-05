@@ -41,6 +41,11 @@ export const rechargeHoursSchema = z.object({
   hours: z.number().int().min(1).max(10),
 });
 
+/** Recarga por importe personalizado: de 1 € a 1000 € (en céntimos). */
+export const rechargeAmountSchema = z.object({
+  amountCents: z.number().int().min(100).max(100_000),
+});
+
 /** La asesora fija el precio por hora de la recarga (en céntimos). */
 export const rechargePriceSchema = z.object({
   // Entre 1 € y 1000 €/hora.

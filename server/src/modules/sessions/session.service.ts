@@ -455,6 +455,11 @@ export async function startTopupByHours(userId: string, hours: number) {
   return startTopup(userId, pricePerHour * hours);
 }
 
+/** Recarga por importe personalizado (el importe ya viene validado 1–1000 €). */
+export async function startTopupAmount(userId: string, amountCents: number) {
+  return startTopup(userId, amountCents);
+}
+
 /** Precio por hora de la recarga (público, para mostrarlo en el modal). */
 export async function getRechargePrice() {
   const { getRechargePriceCents } = await import(

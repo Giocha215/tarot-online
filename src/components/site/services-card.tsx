@@ -58,11 +58,50 @@ export function ServicesCard() {
         className="pointer-events-none absolute inset-0 bg-surface/20"
       />
 
+      {/* estrellas decorativas alrededor de la carta */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <span className="absolute left-4 top-6 animate-twinkle text-gold/70">✦</span>
+        <span
+          className="absolute right-5 top-10 animate-twinkle text-lg text-accent1/50"
+          style={{ animationDelay: "1s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="absolute right-6 top-1/2 animate-twinkle text-xs text-gold/60"
+          style={{ animationDelay: "2.4s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="absolute left-5 top-1/2 animate-twinkle text-gold/50"
+          style={{ animationDelay: "1.6s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="absolute bottom-6 left-7 animate-twinkle text-sm text-accent1/40"
+          style={{ animationDelay: "0.6s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="absolute bottom-8 right-8 animate-twinkle text-gold/70"
+          style={{ animationDelay: "2s" }}
+        >
+          ✦
+        </span>
+      </div>
+
       <div className="relative flex flex-col">
-        <p className="text-center font-cinzel text-[1.05rem] font-semibold text-ink">
-          {t.available.moreServices}
-        </p>
-        <div className="mt-10 flex flex-col gap-3">
+        {/* mismo alto que el bloque de saldo de la tarjeta Recargar → el botón
+            "Serviços de Tarot" queda alineado con "Recargar". */}
+        <div className="flex h-[76px] items-center justify-center">
+          <p className="font-serif text-2xl text-ink">
+            {t.available.moreServices}
+          </p>
+        </div>
+        <div className="flex flex-col gap-3">
           <button
             type="button"
             onClick={() => gate("tarot")}

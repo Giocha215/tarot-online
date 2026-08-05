@@ -44,7 +44,7 @@ function ChannelButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2.5 text-ink-soft transition-all active:scale-[0.98]",
+        "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2.5 text-white transition-all active:scale-[0.98]",
         disabled
           ? "cursor-not-allowed opacity-40 grayscale"
           : "hover:brightness-105",

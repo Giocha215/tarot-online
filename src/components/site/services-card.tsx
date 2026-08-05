@@ -97,7 +97,7 @@ export function ServicesCard() {
         {/* mismo alto que el bloque de saldo de la tarjeta Recargar → el botón
             "Serviços de Tarot" queda alineado con "Recargar". */}
         <div className="flex h-[76px] items-center justify-center">
-          <p className="font-serif text-2xl text-ink">
+          <p className="font-serif text-2xl font-bold text-ink">
             {t.available.moreServices}
           </p>
         </div>

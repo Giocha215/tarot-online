@@ -108,7 +108,7 @@ const pt = {
   available: {
     advisorBio: "Maria — especialista em consultoria espiritual com mais de 20 anos de experiência.",
     moreServices: "Mais serviços",
-    titlePre: "Disponíveis",
+    titlePre: "Disponível",
     titleAccent: "agora",
     subtitle:
       "Está a um clique de se guiar para o seu futuro com clareza e confiança.",
@@ -340,7 +340,7 @@ const pt = {
     workSub:
       "Junte-se à equipa APP Tarot Online. Submeta a sua candidatura em poucos minutos.",
     candidatar: "Candidatar-me",
-    appName: "Tarot Demo",
+    appName: "Tarot · Oráculo da Maria",
     ageNote: "© 2026 · Consultas para maiores de 18 anos",
     procuraPor: "Procura por",
     searchChips: [
@@ -543,7 +543,7 @@ const es: Dict = {
   available: {
     advisorBio: "Maria — experta consultora espiritual con más de 20 años de experiencia.",
     moreServices: "Más servicios",
-    titlePre: "Disponibles",
+    titlePre: "Disponible",
     titleAccent: "ahora",
     subtitle:
       "Estás a un clic de guiarte hacia tu futuro con claridad y confianza.",
@@ -775,7 +775,7 @@ const es: Dict = {
     workSub:
       "Únete al equipo APP Tarot Online. Envía tu candidatura en pocos minutos.",
     candidatar: "Postularme",
-    appName: "Tarot Demo",
+    appName: "Tarot · Oráculo da Maria",
     ageNote: "© 2026 · Consultas para mayores de 18 años",
     procuraPor: "Busca por",
     searchChips: [
@@ -1206,7 +1206,7 @@ const en: Dict = {
     workSub:
       "Join the APP Tarot Online team. Submit your application in just a few minutes.",
     candidatar: "Apply now",
-    appName: "Tarot Demo",
+    appName: "Tarot · Oráculo da Maria",
     ageNote: "© 2026 · Readings for adults 18+",
     procuraPor: "Search for",
     searchChips: [

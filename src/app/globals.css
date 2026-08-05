@@ -77,7 +77,7 @@
   }
   .btn-flame {
     @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300;
-    color: hsl(var(--c-ink-soft));
+    color: #fff;
     background-image: linear-gradient(100deg, hsl(var(--c-accent-2)), hsl(var(--c-accent)));
     box-shadow: 0 10px 26px -10px hsl(var(--c-accent) / 0.72);
   }

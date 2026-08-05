@@ -46,24 +46,37 @@ export function ServicesCard() {
   };
 
   return (
-    <article className="flex w-[320px] shrink-0 snap-start flex-col justify-center gap-3 rounded-2xl border border-line bg-surface p-5 shadow-soft">
-      <p className="text-[0.85rem] font-semibold uppercase tracking-wide text-ink-soft">
-        {t.available.moreServices}
-      </p>
-      <button
-        type="button"
-        onClick={() => gate("tarot")}
-        className="btn-flame w-full justify-center px-5 py-3"
-      >
-        🔮 {t.booking.readingsTitle}
-      </button>
-      <button
-        type="button"
-        onClick={() => gate("works")}
-        className="w-full rounded-full border border-accent1/60 bg-accent1/5 px-5 py-3 text-sm font-semibold text-accent1 hover:bg-accent1/10"
-      >
-        🕯️ {t.works.title}
-      </button>
+    <article className="relative flex w-[320px] shrink-0 snap-start flex-col justify-center gap-3 overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-soft">
+      {/* fondo traslúcido: carta "Rueda de la Fortuna" (símbolos del zodiaco) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.16]"
+        style={{ backgroundImage: "url(/images/tarot/wheel.jpg)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface/85 via-surface/40 to-surface/25"
+      />
+
+      <div className="relative flex flex-col gap-3">
+        <p className="text-[0.85rem] font-semibold uppercase tracking-wide text-ink-soft">
+          {t.available.moreServices}
+        </p>
+        <button
+          type="button"
+          onClick={() => gate("tarot")}
+          className="btn-flame w-full justify-center px-5 py-3"
+        >
+          🔮 {t.booking.readingsTitle}
+        </button>
+        <button
+          type="button"
+          onClick={() => gate("works")}
+          className="w-full rounded-full border border-accent1/60 bg-surface/80 px-5 py-3 text-sm font-semibold text-accent1 hover:bg-accent1/10"
+        >
+          🕯️ {t.works.title}
+        </button>
+      </div>
 
       {picker === "tarot" && (
         <PickerModal

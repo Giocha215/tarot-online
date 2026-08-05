@@ -498,8 +498,8 @@ export function AvailableNow() {
             onBooked={() => setApptRefresh((n) => n + 1)}
           />
         ))}
-        <CreditCard t={t} />
         <ServicesCard />
+        <CreditCard t={t} />
       </div>
 
       {/* dots */}

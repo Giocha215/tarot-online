@@ -50,7 +50,7 @@ export function ServicesCard() {
       {/* fondo traslúcido: carta completa "El Sol" (éxito). */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.13]"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.08]"
         style={{ backgroundImage: "url(/images/tarot/sun.jpg)" }}
       />
       <div
